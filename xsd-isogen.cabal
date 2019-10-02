@@ -23,13 +23,17 @@ library
                      , Text.XSD.Parser
                      , Text.XSD.Internal
 
+  default-extensions:  OverloadedStrings
   other-extensions:    TemplateHaskell
 
   -- Other library packages from which modules are imported.
   build-depends:       base ^>=4.12.0.0
                      , bytestring
+                     , containers
                      , lens >= 4.13
+                     , mtl
                      , text
+                     , transformers
                      , xml-conduit
 
   -- Directories containing source files.
@@ -37,3 +41,25 @@ library
 
   -- Base language which the package is written in.
   default-language:    Haskell2010
+
+test-suite spec
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     test
+  main-is:            Main.hs
+  build-depends:      base
+                    , bytestring
+                    , hspec
+                    , transformers
+                    , xml-conduit
+                    , xsd-isogen
+  default-language:   Haskell2010
+  default-extensions:  CPP
+                     , DeriveGeneric
+                     , FlexibleInstances
+                     , LambdaCase
+                     , OverloadedStrings
+                     , StandaloneDeriving
+                     , TemplateHaskell
+                     , TupleSections
+                     , TypeFamilies
+  ghc-options:        -Wall -fno-warn-missing-signatures
