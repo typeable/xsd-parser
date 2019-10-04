@@ -24,6 +24,7 @@ library
                      , Text.XSD.Internal
 
   default-extensions:  OverloadedStrings
+                     , LambdaCase
   other-extensions:    TemplateHaskell
 
   -- Other library packages from which modules are imported.
@@ -35,6 +36,7 @@ library
                      , text
                      , transformers
                      , xml-conduit
+                     , writer-cps-mtl
 
   -- Directories containing source files.
   hs-source-dirs:      src

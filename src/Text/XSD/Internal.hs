@@ -9,16 +9,22 @@ import Data.Map as M
 
 
 -- | Roughly based on https://www.w3.org/TR/xmlschema11-2/#built-in-datatypes
+-- | and https://www.w3.org/TR/xmlschema11-1/#dcl.ctd.ctsc
 data Datatype
-  = ComplexType ComplexType
+  = ComplexType (Maybe Text) ModelGroupSchema [Element]
   | SimpleType SimpleType
   deriving (Show)
 
--- | Based on https://www.w3.org/TR/xmlschema11-1/#dcl.ctd.ctsc
--- Only sequence and choice are supported
-data ComplexType
+data DatatypeRef
+  = InlineComplex Datatype
+  | DatatypeRef Text
+  deriving (Show)
+
+-- | Based on https://www.w3.org/TR/2012/REC-xmlschema11-1-20120405/structures.html#Model_Group_details
+data ModelGroupSchema
   = CTSequence
   | CTChoice
+  | CTAll
   deriving (Show)
 
 -- | ENTITIES, IDREFS and NMTOKENS are not supported right now.
@@ -42,8 +48,8 @@ data SimpleType
   | STQName QName
   | STString StringType
   | STTime
-  | STUnion -- special - xs:union
-  | STList  -- special - xs:list
+  | STUnion [SimpleType] -- special - xs:union
+  | STList [SimpleType]  -- special - xs:list
   deriving (Show)
 
 data StringType
@@ -80,35 +86,22 @@ type LocalName = Text
 
 type Namespace = Text
 
-type QName = (Namespace, LocalName)
-
--- data Definition
---   = XSString
---   | XSSeq [Definition]
---   | XSChoice [Definition]
---   deriving (Show)
-
-type Attribute = (Text, Text)
+type QName = (Maybe Namespace, LocalName)
 
 -- | Based on https://www.w3.org/TR/xmlschema11-1/#concepts-data-model
 -- Secondary and helper schema components are not supported right now.
-data SchemaComponent
-  = SCSimpleType SimpleType
-  | SCComplexType ComplexType
-  | SCElement Element
-  | SCAttribute
-  deriving (Show)
+-- data SchemaComponent
+--   = SCDatatype Datatype
+--   | SCElement Element
+--   | SCAttribute
+--   deriving (Show)
 
 data Element = Element
-  { name       :: String
-  , target     :: Maybe Namespace
-  , xtype      :: Datatype
-  , attrs      :: [Attribute]
-  , abstract   :: Bool
-  , elements :: [Element]
-  }
-  deriving (Show)
+  { name     :: QName
+  , xtype    :: DatatypeRef
+  -- , elements :: [Element]
+  } deriving (Show)
 
 -- | Embodies an XSD document
-newtype XSD = XSD { unXSD :: Element }
+newtype XSD = XSD { unXSD :: [Element] }
   deriving (Show)

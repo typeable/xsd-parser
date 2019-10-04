@@ -2,10 +2,13 @@ module Text.XSD.Parser where
 
 import Control.Exception
 import Control.Monad
-import Control.Monad.Error
+import Control.Monad.Except (throwError)
 import Control.Monad.Trans.Reader
+import Control.Monad.Writer.CPS
 import Data.ByteString.Lazy
+import Data.Foldable
 import Data.Map as M
+import Data.Maybe
 import Data.Text
 import Prelude as P
 import Text.XML as XML
@@ -18,7 +21,7 @@ newtype XSDException = XSDException String
 
 instance Exception XSDException
 
-type XSDMonad a = ReaderT (M.Map Name Datatype) (Either SomeException) a
+type XSDMonad a = WriterT (M.Map Text Datatype) (Either SomeException) a
 
 parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD.Element
 parseXSD ps bs = parseLBS ps bs >>= toXsd
@@ -59,24 +62,96 @@ satisfySome' checkCurrent cur (exp:exps) = result
 throwXsd :: Show s => s -> XSDMonad a
 throwXsd = throwError . SomeException . XSDException . show
 
-toSchema :: XML.Node -> [XSD.Element] -> XSDMonad XSD
-toSchema (XML.NodeElement (XML.Element (Name name _ _) _ _)) elems
-  | name == "schema" = pure $ XSD $ XSD.Element (XSSeq []) "schema" [] elems
-  | otherwise        = throwXsd "Top-level schema definition not found"
+maybeThrowXsd :: Show s => Maybe a -> s -> XSDMonad a
+maybeThrowXsd (Just a) _ = pure a
+maybeThrowXsd Nothing  e = throwXsd e
 
-fromElem :: XML.Cursor -> XSDMonad XSD.Element
-fromElem cursor = do
+attrThrowXsd :: Show s => XML.Name -> XML.Element -> s -> XSDMonad Text
+attrThrowXsd name elNode = maybeThrowXsd (M.lookup name $ elementAttributes elNode)
+
+-- | Tells the writer about named complex types and returns a list of elements.
+toElemsAndDatatypes :: XML.Cursor -> XSDMonad [XSD.Element]
+toElemsAndDatatypes cursor = do
+  elems <- traverse toElem (cursor $// laxElement "element")
+  datatypes <- traverse toDatatype (cursor $// laxElement "complexType")
+  for_ datatypes $ \case
+    datatype@(ComplexType (Just name) _ _) -> tell (M.singleton name datatype)
+    datatype@(ComplexType Nothing _ _)     ->
+      throwXsd $ "unnamed type ref for datatype: " <> show datatype
+  pure elems
+
+toSchema :: XML.Cursor -> XSDMonad XSD
+toSchema cursor = do
+  let topLevel = cursor $| laxElement "schema"
+  if P.null topLevel
+  then throwXsd "Top-level schema definition not found"
+  else XSD <$> toElemsAndDatatypes cursor
+
+safeHead :: [a] -> Maybe a
+safeHead []    = Nothing
+safeHead (a:_) = Just a
+
+toElem :: Cursor -> XSDMonad XSD.Element
+toElem cursor = do
   case node cursor of
     NodeElement el -> case nameLocalName (elementName el) of
       "element"    -> do
-
-      "simpleType" -> error "TODO: implement"
+        let
+          attrs = elementAttributes el
+          mAttrType = M.lookup "type" attrs
+          ns = nameNamespace $ elementName el
+        name <- attrThrowXsd "name" el
+          $ "Expected attribute 'name' for element: " <> show (node cursor)
+        datatypeRef <- case mAttrType of
+          Just dtn -> pure $ DatatypeRef dtn
+          Nothing  -> do
+            onlyChildCursor <- maybeThrowXsd
+              (safeHead $ cursor $// laxElement "simpleType")
+              $ "Only one type child element expected for element: " <> show name
+            InlineComplex <$> toDatatype onlyChildCursor
+        pure $ XSD.Element
+          { name     = (ns, name)
+          , xtype    = datatypeRef }
+      e            -> throwXsd $ "xsd node not supported: " <> show e
     e              ->
-      throwXsd $ "xsd node not supported: " <> show e
+      throwXsd $ "element expected, got: " <> show e
+
+-- | Returns 'Just element' if encounters an element,
+toDatatype :: Cursor -> XSDMonad Datatype
+toDatatype cursor = do
+  case node cursor of
+    NodeElement el -> case nameLocalName (elementName el) of
+      "simpleType"    -> do
+        error "implement simpleType"
+      "complexType"   -> do
+        let sequenceAxis = laxElement "complexType" &// laxElement "sequence"
+        let choiceAxis   = laxElement "complexType" &// laxElement "choice"
+        let allAxis      = laxElement "complexType" &// laxElement "all"
+        if P.null (cursor $// sequenceAxis)
+        then if P.null (cursor $// choiceAxis)
+          then if P.null (cursor $// allAxis)
+            then throwXsd $ "No definition found for complexType: "
+              <> show (safeHead $ cursor $// laxElement "complexType")
+            else do
+              childCursor <- maybeThrowXsd (safeHead $ cursor $// allAxis)
+                $ "More than one xs:all tag in: "
+                  <> show (cursor $// laxElement "complexType")
+              ComplexType Nothing CTAll <$> toElemsAndDatatypes childCursor
+          else do
+            childCursor <- maybeThrowXsd (safeHead $ cursor $// choiceAxis)
+              $ "More than one xs:choice tag in: "
+                <> show (cursor $// laxElement "complexType")
+            ComplexType Nothing CTChoice <$> toElemsAndDatatypes childCursor
+        else do
+          childCursor <- maybeThrowXsd (safeHead $ cursor $// sequenceAxis)
+            $ "More than one xs:sequence tag in: "
+              <> show (cursor $// laxElement "complexType")
+          ComplexType Nothing CTSequence <$> toElemsAndDatatypes childCursor
+      e            -> throwXsd $ "xsd node not supported: " <> show e
+    e              ->
+      throwXsd $ "element expected, got: " <> show e
 
 toXsd :: Document -> Either SomeException XSD.Element
 toXsd doc = do
-  let
-    cursor = fromDocument doc
-    elems  = child cursor &| fromElem
-  runReader M.null $ toSchema (node cursor) elems
+  (dt, el) <- runWriterT $ toSchema (fromDocument doc)
+  error "implement me"
