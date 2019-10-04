@@ -112,8 +112,7 @@ toElem cursor = do
               childCursor <- maybeThrowXsd (safeHead complexType)
                 $ "More than one xs:complexType tag in: " <> show cursor
               let name = safeHead $ childCursor $| attribute "name"
-              InlineComplex . TypeComplex . ComplexType name CTSequence
-                <$> toElemsAndDatatypes childCursor
+              InlineComplex . TypeComplex <$> toComplexType childCursor
         pure $ XSD.Element
           { name     = (ns, name)
           , xtype    = datatypeRef }
@@ -135,6 +134,7 @@ toSimpleType :: Cursor -> XSDMonad SimpleType
 toSimpleType cursor = do
   error "TODO: implement toSimpleType"
 
+-- | Takes a cursor to the 'xs:complexType' element.
 toComplexType :: Cursor -> XSDMonad ComplexType
 toComplexType cursor = do
   let sequenceAxis = laxElement "sequence"
