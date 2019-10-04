@@ -26,38 +26,6 @@ type XSDMonad a = WriterT (M.Map Text Datatype) (Either SomeException) a
 parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD
 parseXSD ps bs = parseLBS ps bs >>= toXsd
 
-data Expectation
-  = ExpName Text
-  | Expectation :+: Expectation
-
-satisfy :: Expectation -> XML.Node -> Bool
-satisfy exp node@(NodeElement (XML.Element name _ _)) =
-  case node of
-    NodeElement (XML.Element (Name name _ _) _ _) -> case exp of
-      ExpName n     -> name == n
-      exp1 :+: exp2 -> satisfy exp1 node && satisfy exp2 node
-
-satisfySome
-  :: XML.Cursor
-  -> [Expectation]
-  -> Bool
-satisfySome c e = satisfySome' True c e
-
-satisfySome'
-  :: Bool -- ^ check current
-  -> XML.Cursor
-  -> [Expectation]
-  -> Bool
-satisfySome' checkCurrent cur []         = True
-satisfySome' checkCurrent cur (exp:exps) = result
-  where
-    satisfyCurrent = satisfy exp (node cur)
-    validChildren  = P.filter (satisfy (P.head exps) . node) (child cur)
-    result         =
-      if checkCurrent && P.null exps
-      then satisfyCurrent
-      else P.foldr (\c r -> r && satisfySome' False c exps) True validChildren
-
 -- Show is Meh
 throwXsd :: Show s => s -> XSDMonad a
 throwXsd = throwError . SomeException . XSDException . show
@@ -91,6 +59,7 @@ safeHead :: [a] -> Maybe a
 safeHead []    = Nothing
 safeHead (a:_) = Just a
 
+-- | Takes a cursor to the element itself.
 toElem :: Cursor -> XSDMonad XSD.Element
 toElem cursor = do
   case node cursor of
