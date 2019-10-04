@@ -9,7 +9,7 @@ import Data.ByteString.Lazy
 import Data.Foldable
 import Data.Map as M
 import Data.Maybe
-import Data.Text
+import Data.Text as T
 import Prelude as P
 import Text.XML as XML
 import Text.XML.Cursor as XML
@@ -23,7 +23,7 @@ instance Exception XSDException
 
 type XSDMonad a = WriterT (M.Map Text Datatype) (Either SomeException) a
 
-parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD.Element
+parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD
 parseXSD ps bs = parseLBS ps bs >>= toXsd
 
 data Expectation
@@ -72,8 +72,8 @@ attrThrowXsd name elNode = maybeThrowXsd (M.lookup name $ elementAttributes elNo
 -- | Tells the writer about named complex types and returns a list of elements.
 toElemsAndDatatypes :: XML.Cursor -> XSDMonad [XSD.Element]
 toElemsAndDatatypes cursor = do
-  elems <- traverse toElem (cursor $// laxElement "element")
-  datatypes <- traverse toDatatype (cursor $// laxElement "complexType")
+  elems <- traverse toElem (cursor $/ laxElement "element")
+  datatypes <- traverse toDatatype (cursor $/ laxElement "complexType")
   for_ datatypes $ \case
     datatype@(ComplexType (Just name) _ _) -> tell (M.singleton name datatype)
     datatype@(ComplexType Nothing _ _)     ->
@@ -97,24 +97,24 @@ toElem cursor = do
     NodeElement el -> case nameLocalName (elementName el) of
       "element"    -> do
         let
-          attrs = elementAttributes el
+          attrs     = elementAttributes el
           mAttrType = M.lookup "type" attrs
-          ns = nameNamespace $ elementName el
+          ns        = nameNamespace $ elementName el
         name <- attrThrowXsd "name" el
           $ "Expected attribute 'name' for element: " <> show (node cursor)
         datatypeRef <- case mAttrType of
           Just dtn -> pure $ DatatypeRef dtn
           Nothing  -> do
-            onlyChildCursor <- maybeThrowXsd
-              (safeHead $ cursor $// laxElement "simpleType")
-              $ "Only one type child element expected for element: " <> show name
-            InlineComplex <$> toDatatype onlyChildCursor
+            case safeHead (cursor $// anyElement) of
+              Just c  -> InlineComplex <$> toDatatype c
+              Nothing ->
+                throwXsd $ "[toElem] unexpected children of " <> T.unpack name
         pure $ XSD.Element
           { name     = (ns, name)
           , xtype    = datatypeRef }
-      e            -> throwXsd $ "xsd node not supported: " <> show e
+      e            -> throwXsd $ "[toElem] xsd node not supported: " <> show e
     e              ->
-      throwXsd $ "element expected, got: " <> show e
+      throwXsd $ "[toElem] element expected, got: " <> show e
 
 -- | Returns 'Just element' if encounters an element,
 toDatatype :: Cursor -> XSDMonad Datatype
@@ -124,9 +124,9 @@ toDatatype cursor = do
       "simpleType"    -> do
         error "implement simpleType"
       "complexType"   -> do
-        let sequenceAxis = laxElement "complexType" &// laxElement "sequence"
-        let choiceAxis   = laxElement "complexType" &// laxElement "choice"
-        let allAxis      = laxElement "complexType" &// laxElement "all"
+        let sequenceAxis = laxElement "sequence"
+        let choiceAxis   = laxElement "choice"
+        let allAxis      = laxElement "all"
         if P.null (cursor $// sequenceAxis)
         then if P.null (cursor $// choiceAxis)
           then if P.null (cursor $// allAxis)
@@ -136,22 +136,25 @@ toDatatype cursor = do
               childCursor <- maybeThrowXsd (safeHead $ cursor $// allAxis)
                 $ "More than one xs:all tag in: "
                   <> show (cursor $// laxElement "complexType")
-              ComplexType Nothing CTAll <$> toElemsAndDatatypes childCursor
+              let name = safeHead $ cursor $| attribute "name"
+              ComplexType name CTAll <$> toElemsAndDatatypes childCursor
           else do
             childCursor <- maybeThrowXsd (safeHead $ cursor $// choiceAxis)
               $ "More than one xs:choice tag in: "
                 <> show (cursor $// laxElement "complexType")
-            ComplexType Nothing CTChoice <$> toElemsAndDatatypes childCursor
+            let name = safeHead $ cursor $| attribute "name"
+            ComplexType name CTChoice <$> toElemsAndDatatypes childCursor
         else do
           childCursor <- maybeThrowXsd (safeHead $ cursor $// sequenceAxis)
             $ "More than one xs:sequence tag in: "
               <> show (cursor $// laxElement "complexType")
-          ComplexType Nothing CTSequence <$> toElemsAndDatatypes childCursor
-      e            -> throwXsd $ "xsd node not supported: " <> show e
+          let name = safeHead $ cursor $| attribute "name"
+          ComplexType name CTSequence <$> toElemsAndDatatypes childCursor
+      e            -> throwXsd $ "[toDatatype] xsd node not supported: " <> show e
     e              ->
-      throwXsd $ "element expected, got: " <> show e
+      throwXsd $ "[toDatatype] element expected, got: " <> show e
 
-toXsd :: Document -> Either SomeException XSD.Element
+toXsd :: Document -> Either SomeException XSD
 toXsd doc = do
-  (dt, el) <- runWriterT $ toSchema (fromDocument doc)
-  error "implement me"
+  (el, dt) <- runWriterT $ toSchema (fromDocument doc)
+  pure el

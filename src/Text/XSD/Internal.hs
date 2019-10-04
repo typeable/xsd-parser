@@ -13,19 +13,19 @@ import Data.Map as M
 data Datatype
   = ComplexType (Maybe Text) ModelGroupSchema [Element]
   | SimpleType SimpleType
-  deriving (Show)
+  deriving (Show, Eq)
 
 data DatatypeRef
   = InlineComplex Datatype
   | DatatypeRef Text
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | Based on https://www.w3.org/TR/2012/REC-xmlschema11-1-20120405/structures.html#Model_Group_details
 data ModelGroupSchema
   = CTSequence
   | CTChoice
   | CTAll
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | ENTITIES, IDREFS and NMTOKENS are not supported right now.
 data SimpleType
@@ -50,7 +50,7 @@ data SimpleType
   | STTime
   | STUnion [SimpleType] -- special - xs:union
   | STList [SimpleType]  -- special - xs:list
-  deriving (Show)
+  deriving (Show, Eq)
 
 data StringType
   = StrNormalizedString
@@ -62,7 +62,7 @@ data StringType
   | StrID
   | StrIDREF
   | StrNMTOKEN
-  deriving (Show)
+  deriving (Show, Eq)
 
 data DurationType = DayTimeDuration | YearMonthDuration deriving (Show, Eq)
 
@@ -99,9 +99,8 @@ type QName = (Maybe Namespace, LocalName)
 data Element = Element
   { name     :: QName
   , xtype    :: DatatypeRef
-  -- , elements :: [Element]
-  } deriving (Show)
+  } deriving (Show, Eq)
 
 -- | Embodies an XSD document
 newtype XSD = XSD { unXSD :: [Element] }
-  deriving (Show)
+  deriving (Show, Eq)
