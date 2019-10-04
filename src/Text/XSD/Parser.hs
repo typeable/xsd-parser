@@ -105,10 +105,15 @@ toElem cursor = do
         datatypeRef <- case mAttrType of
           Just dtn -> pure $ DatatypeRef dtn
           Nothing  -> do
-            case safeHead (cursor $// anyElement) of
-              Just c  -> InlineComplex <$> toDatatype c
-              Nothing ->
-                throwXsd $ "[toElem] unexpected children of " <> T.unpack name
+            let complexType = cursor $// laxElement "complexType"
+            if P.null complexType
+            then throwXsd $ "No datatype definition found for element: " <> name
+            else do
+              childCursor <- maybeThrowXsd (safeHead complexType)
+                $ "More than one xs:complexType tag in: " <> show cursor
+              let name = safeHead $ childCursor $| attribute "name"
+              InlineComplex . TypeComplex . ComplexType name CTSequence
+                <$> toElemsAndDatatypes childCursor
         pure $ XSD.Element
           { name     = (ns, name)
           , xtype    = datatypeRef }
@@ -116,15 +121,15 @@ toElem cursor = do
     e              ->
       throwXsd $ "[toElem] element expected, got: " <> show e
 
-toDatatype :: Cursor -> XSDMonad Datatype
-toDatatype cursor = do
-  case node cursor of
-    NodeElement el -> case nameLocalName (elementName el) of
-      "simpleType"  -> TypeSimple <$> toSimpleType cursor
-      "complexType" -> TypeComplex <$> toComplexType cursor
-      e             -> throwXsd $ "[toDatatype] xsd node not supported: " <> show e
-    e              ->
-      throwXsd $ "[toDatatype] element expected, got: " <> show e
+-- toDatatype :: Cursor -> XSDMonad Datatype
+-- toDatatype cursor = do
+--   case node cursor of
+--     NodeElement el -> case nameLocalName (elementName el) of
+--       "simpleType"  -> TypeSimple <$> toSimpleType cursor
+--       "complexType" -> TypeComplex <$> toComplexType cursor
+--       e             -> throwXsd $ "[toDatatype] xsd node not supported: " <> show e
+--     e              ->
+--       throwXsd $ "[toDatatype] element expected, got: " <> show e
 
 toSimpleType :: Cursor -> XSDMonad SimpleType
 toSimpleType cursor = do
