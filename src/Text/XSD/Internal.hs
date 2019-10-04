@@ -11,8 +11,11 @@ import Data.Map as M
 -- | Roughly based on https://www.w3.org/TR/xmlschema11-2/#built-in-datatypes
 -- | and https://www.w3.org/TR/xmlschema11-1/#dcl.ctd.ctsc
 data Datatype
-  = ComplexType (Maybe Text) ModelGroupSchema [Element]
-  | SimpleType SimpleType
+  = TypeComplex ComplexType
+  | TypeSimple SimpleType
+  deriving (Show, Eq)
+
+data ComplexType = ComplexType (Maybe Text) ModelGroupSchema [Element]
   deriving (Show, Eq)
 
 data DatatypeRef
@@ -29,6 +32,12 @@ data ModelGroupSchema
 
 -- | ENTITIES, IDREFS and NMTOKENS are not supported right now.
 data SimpleType
+  = STAtomic SimpleAtomicType
+  | STUnion [SimpleType] -- special - xs:union
+  | STList [SimpleType]  -- special - xs:list
+  deriving (Show, Eq)
+
+data SimpleAtomicType
   = STAnyURI
   | STBase64Binary
   | STBoolean
@@ -48,8 +57,6 @@ data SimpleType
   | STQName QName
   | STString StringType
   | STTime
-  | STUnion [SimpleType] -- special - xs:union
-  | STList [SimpleType]  -- special - xs:list
   deriving (Show, Eq)
 
 data StringType
