@@ -18,6 +18,7 @@ extra-source-files:  CHANGELOG.md
 
 
 library
+  ghc-options:         -Werror
   -- Modules exported by the library.
   exposed-modules:     Text.XSD
                      , Text.XSD.Parser
@@ -37,6 +38,7 @@ library
                      , transformers
                      , xml-conduit
                      , writer-cps-mtl
+                     , uniplate
 
   -- Directories containing source files.
   hs-source-dirs:      src

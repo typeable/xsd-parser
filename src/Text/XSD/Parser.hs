@@ -6,8 +6,10 @@ import Control.Monad.Except (throwError)
 import Control.Monad.Trans.Reader
 import Control.Monad.Writer.CPS
 import Data.ByteString.Lazy
-import Data.Foldable
+import Data.Foldable as F
+-- import Data.Generics.Uniplate.Operations
 import Data.Map as M
+import Debug.Trace
 import Data.Maybe
 import Data.Text as T
 import Prelude as P
@@ -24,7 +26,7 @@ instance Exception XSDException
 type XSDMonad a = WriterT (M.Map Text Datatype) (Either SomeException) a
 
 parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD
-parseXSD ps bs = parseLBS ps bs >>= toXsd
+parseXSD ps bs = parseLBS ps bs >>= fmap fst . toXsd
 
 -- Show is Meh
 throwXsd :: Show s => s -> XSDMonad a
@@ -43,8 +45,9 @@ toElemsAndDatatypes cursor = do
   elems <- traverse toElem (cursor $/ laxElement "element")
   datatypes <- traverse toComplexType (cursor $/ laxElement "complexType")
   for_ datatypes $ \case
-    datatype@(ComplexType (Just name) _ _) -> tell (M.singleton name (TypeComplex datatype))
-    datatype@(ComplexType Nothing _ _)     ->
+    datatype@(ComplexType (Just name) _ _) ->
+      tell (M.singleton name (TypeComplex datatype))
+    datatype@(ComplexType Nothing _  _) ->
       throwXsd $ "unnamed type ref for datatype: " <> show datatype
   pure elems
 
@@ -101,14 +104,33 @@ toElem cursor = do
 
 toSimpleType :: Cursor -> XSDMonad SimpleType
 toSimpleType cursor = do
-  error "TODO: implement toSimpleType"
+  let restrictionAxis = laxElement "restriction"
+  if P.null (cursor $// restrictionAxis)
+  then throwXsd $ "unsupported simpleType element: " <> show cursor
+  else do
+    childCursor <- maybeThrowXsd (safeHead $ cursor $// restrictionAxis)
+      $ "Unexpected number of <restriction> tags in: " <> show cursor
+    baseType <- maybeThrowXsd (safeHead $ childCursor $| attribute "base")
+      $ "No base attribute provided for restriction tag in: " <> show cursor
+    let
+      enumValues = childCursor $// laxElement "enumeration" &/ attribute "value"
+    -- only enumeration is supported now
+    case fromSimpleTypeStr baseType of
+      Left e                  -> throwXsd e
+      Right simpleAtomicType  ->
+        pure $ STAtomic simpleAtomicType
+          $ if P.null enumValues then [] else [Enumeration enumValues]
 
 -- | Takes a cursor to the 'xs:complexType' element.
 toComplexType :: Cursor -> XSDMonad ComplexType
 toComplexType cursor = do
-  let sequenceAxis = laxElement "sequence"
-  let choiceAxis   = laxElement "choice"
-  let allAxis      = laxElement "all"
+  let attributeAxis = laxElement "attribute"
+  let sequenceAxis  = laxElement "sequence"
+  let choiceAxis    = laxElement "choice"
+  let allAxis       = laxElement "all"
+  -- attributes
+  attrs <- traverse toAttribute (cursor $// attributeAxis)
+  -- group model schemas
   if P.null (cursor $// sequenceAxis)
   then if P.null (cursor $// choiceAxis)
     then if P.null (cursor $// allAxis)
@@ -116,24 +138,41 @@ toComplexType cursor = do
         <> show (safeHead $ cursor $// laxElement "complexType")
       else do
         childCursor <- maybeThrowXsd (safeHead $ cursor $// allAxis)
-          $ "More than one xs:all tag in: "
-            <> show (cursor $// laxElement "complexType")
+          $ "Unexpected number of xs:all tags in: " <> show cursor
         let name = safeHead $ cursor $| attribute "name"
-        ComplexType name CTAll <$> toElemsAndDatatypes childCursor
+        ComplexType name attrs . Just . CTAll <$> toElemsAndDatatypes childCursor
     else do
       childCursor <- maybeThrowXsd (safeHead $ cursor $// choiceAxis)
-        $ "More than one xs:choice tag in: "
-          <> show (cursor $// laxElement "complexType")
+        $ "Unexpected number of xs:choice tags in: " <> show cursor
       let name = safeHead $ cursor $| attribute "name"
-      ComplexType name CTChoice <$> toElemsAndDatatypes childCursor
+      ComplexType name attrs . Just . CTChoice <$> toElemsAndDatatypes childCursor
   else do
     childCursor <- maybeThrowXsd (safeHead $ cursor $// sequenceAxis)
-      $ "More than one xs:sequence tag in: "
-        <> show (cursor $// laxElement "complexType")
+      $ "Unexpected number of xs:sequence tags in: " <> show cursor
     let name = safeHead $ cursor $| attribute "name"
-    ComplexType name CTSequence <$> toElemsAndDatatypes childCursor
+    ComplexType name attrs . Just . CTSequence <$> toElemsAndDatatypes childCursor
 
-toXsd :: Document -> Either SomeException XSD
-toXsd doc = do
-  (el, dt) <- runWriterT $ toSchema (fromDocument doc)
-  pure el
+toAttribute :: XML.Cursor -> XSDMonad Attribute
+toAttribute cursor = do
+  name <- maybeThrowXsd (safeHead $ cursor $| attribute "name")
+    $ "No name attribute found in child <attribute> of: "
+      <> show (cursor $| ancestor <=< ancestor)
+  simpleType <- case safeHead $ cursor $| attribute "type" of
+    Just simpleAtomicType -> case fromSimpleTypeStr simpleAtomicType of
+      Left e                  -> throwXsd e
+      Right simpleAtomicType  -> pure $ STAtomic simpleAtomicType []
+    Nothing -> do
+      let simpleTypeCursor = safeHead $ cursor $// laxElement "simpleType"
+      case simpleTypeCursor of
+        Just st -> toSimpleType cursor
+        Nothing -> throwXsd
+          $ "No type attribute found in child <attribute> of: "
+            <> show (cursor $| ancestor <=< ancestor)
+  let
+    useProp = case fromUsePropStr =<< safeHead (cursor $| attribute "use") of
+      Just up -> up
+      Nothing -> Optional
+  pure $ Attribute name simpleType useProp
+
+toXsd :: Document -> Either SomeException (XSD, M.Map Text Datatype)
+toXsd doc = runWriterT $ toSchema (fromDocument doc)

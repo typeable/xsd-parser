@@ -1,0 +1,1702 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:spct="http://services.sabre.com/sp/common/simple/v3" xmlns:stlp="http://services.sabre.com/STL_Payload/v02_01" xmlns:ns1="http://services.sabre.com/sp/air/ticket/v1" targetNamespace="http://services.sabre.com/sp/air/ticket/v1" elementFormDefault="qualified">
+  <import namespace="http://services.sabre.com/STL_Payload/v02_01" schemaLocation="built-ins/STL2_Payload_v02_01.xsd"/>
+  <import namespace="http://services.sabre.com/sp/common/simple/v3" schemaLocation="SpCommonSimpleTypes_v3.xsd"/>
+  <element name="AirTicketRQ">
+    <complexType>
+      <complexContent>
+        <extension base="stlp:STL_Request_Payload">
+          <sequence>
+            <element name="DesignatePrinter" minOccurs="0">
+              <complexType>
+                <sequence>
+                  <element name="Printers" minOccurs="0">
+                    <complexType>
+                      <sequence>
+                        <element name="BagTag" minOccurs="0">
+                          <complexType>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="BoardingPass" minOccurs="0">
+                          <complexType>
+                            <attribute name="HostedCarrier" type="boolean" use="optional">
+                              <annotation>
+                                <documentation>"HostedCarrier" is used by airline customers to indicate that this request is for an airline-based boarding pass printer.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Hardcopy" minOccurs="0">
+                          <complexType>
+                            <attribute name="Spacing" use="optional">
+                              <annotation>
+                                <documentation>"Spacing" is used to specify the spacing, either 1, or 2.</documentation>
+                              </annotation>
+                              <simpleType>
+                                <restriction base="string">
+                                  <enumeration value="1"/>
+                                  <enumeration value="2"/>
+                                </restriction>
+                              </simpleType>
+                            </attribute>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="InvoiceItinerary" minOccurs="0">
+                          <complexType>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="ListLabel" minOccurs="0">
+                          <complexType>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="MiniItinerary" minOccurs="0">
+                          <complexType>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Report" minOccurs="0">
+                          <complexType>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Ticket" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="MiniItinerary" minOccurs="0">
+                                <complexType>
+                                  <attribute name="LNIATA" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="Remote" minOccurs="0">
+                                <complexType>
+                                  <attribute name="LNIATA" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="CountryCode" type="string" use="optional"/>
+                            <attribute name="LNIATA" type="string" use="optional">
+                              <annotation>
+                                <documentation>"LNIATA" is used to specify a bag tag printer address.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                  <element name="Profile" minOccurs="0">
+                    <complexType>
+                      <attribute name="Number" type="integer" use="optional">
+                        <annotation>
+                          <documentation>"Number" is used to specify a previously established printer number.</documentation>
+                        </annotation>
+                      </attribute>
+                    </complexType>
+                  </element>
+                </sequence>
+              </complexType>
+            </element>
+            <element name="Itinerary" minOccurs="1">
+              <complexType>
+                <attribute name="ID" use="required">
+                  <annotation>
+                    <documentation>"ID" is used to specify a record locator.</documentation>
+                  </annotation>
+                  <simpleType>
+                    <restriction base="string"/>
+                  </simpleType>
+                </attribute>
+              </complexType>
+            </element>
+            <element name="AccountingLines" minOccurs="0">
+              <complexType>
+                <sequence>
+                  <element name="Delete" minOccurs="0" maxOccurs="unbounded">
+                    <complexType>
+                      <attribute name="EndNumber" type="integer" use="optional">
+                        <annotation>
+                          <documentation>"EndNumber" when used with @Number to specify a range of accounting lines to delete.</documentation>
+                        </annotation>
+                      </attribute>
+                      <attribute name="Number" type="integer" use="required">
+                        <annotation>
+                          <documentation>"Number" is used to specify particular accounting lines.</documentation>
+                        </annotation>
+                      </attribute>
+                    </complexType>
+                  </element>
+                </sequence>
+                <attribute name="All" type="boolean" use="optional">
+                  <annotation>
+                    <documentation>"All" is used to delete all accounting lines, cannot combine with attribute None.</documentation>
+                  </annotation>
+                </attribute>
+                <attribute name="None" type="boolean" use="optional">
+                  <annotation>
+                    <documentation>"None" is used to indicate not to delete any of the accounting lines, cannot combine with "All" attribute.</documentation>
+                  </annotation>
+                </attribute>
+              </complexType>
+            </element>
+            <element name="Ticketing" minOccurs="1" maxOccurs="99">
+              <complexType>
+                <sequence>
+                  <element name="FlightQualifiers" minOccurs="0">
+                    <complexType>
+                      <sequence>
+                        <element name="VendorPrefs" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="Airline">
+                                <complexType>
+                                  <attribute name="Code" type="string" use="required">
+                                    <annotation>
+                                      <documentation>"Code" is used to specify a particular vendor code.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                  <element name="FOP_Qualifiers" minOccurs="0">
+                    <complexType>
+                      <sequence>
+                        <element name="BasicFOP" minOccurs="0">
+                          <annotation>
+                            <documentation>BasicFOP cannot combine with .../BSP_Ticketing, or .../SabreSonicTicketing, or .../Multiple CC_FOP.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="CC_Info" minOccurs="0">
+                                <complexType>
+                                  <sequence>
+                                    <element name="PaymentCard">
+                                      <complexType>
+                                        <attribute name="Code" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Code" is used to specify a credit card vendor code.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="CardSecurityCode" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"CardSecurityCode" is used to specify a credit card Card Security Code number.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="ExpireDate" type="spct:expireDate" use="optional">
+                                          <annotation>
+                                            <documentation>"ExpireDate" is used to specify a credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="ExtendedPayment" type="integer" use="optional">
+                                          <annotation>
+                                            <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="ManualApprovalCode" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="Number" type="integer" use="optional">
+                                          <annotation>
+                                            <documentation>"Number" is used to specify a credit card number.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                  <attribute name="Suppress" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="Reference" type="integer" use="optional"/>
+                            <attribute name="Type" type="string" use="optional">
+                              <annotation>
+                                <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA," (cash) "CK," (check) "CQ," (cheque).  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Virtual" type="string" use="optional"/>
+                          </complexType>
+                        </element>
+                        <element name="BSP_Ticketing" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="MultipleFOP" minOccurs="0">
+                                <annotation>
+                                  <documentation>MultipleFOP cannot combine with .../MultipleMiscFOP, or .../PayLaterPlan</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="Fare">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Amount" is used to specify the amount to be applied to the second FOP.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_One">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="CardSecurityCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"CardSecurityCode" is used to specify a credit card Card Security Code number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualOBFee" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualOBFee" is used to indicate that the manual OB fee should be associated to the card. A manual OB fee can ONLY be added to a ticketing entry that references a PQ that has the PRICE-MANUAL tag at the bottom of the *PQ</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                              <attribute name="Suppress" type="boolean" use="optional">
+                                                <annotation>
+                                                  <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA,"CK," or "CQ."  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_Two">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="CardSecurityCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"CardSecurityCode" is used to specify a credit card Card Security Code number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualOBFee" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>b"ManualOBFee" is used to indicate that the manual OB fee should be associated to the card. A manual OB fee can ONLY be added to a ticketing entry that references a PQ that has the PRICE-MANUAL tag at the bottom of the *PQ</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                              <attribute name="Suppress" type="boolean" use="optional">
+                                                <annotation>
+                                                  <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA,"CK," or "CQ."  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="Taxes" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="Tax" maxOccurs="3">
+                                            <complexType>
+                                              <attribute name="Amount" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Amount" is used to specify the tax amount.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="TaxCode" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"TaxCode" is used to specify the tax code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                              <element name="MultipleMiscFOP" minOccurs="0">
+                                <annotation>
+                                  <documentation>MultipleMiscFOP cannot combine with .../MultipleFOP, or .../PayLaterPlan.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="Fare">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Amount" is used to specify the fare amount to be applied to the second FOP.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_One">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                              <attribute name="Suppress" type="boolean" use="optional">
+                                                <annotation>
+                                                  <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA,"CK," or "CQ."  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_Two">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="ExtendedPayment" minOccurs="0">
+                                            <complexType>
+                                              <attribute name="NumMonths" type="integer" use="required"/>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="required"/>
+                                      </complexType>
+                                    </element>
+                                    <element name="Taxes" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="Tax" maxOccurs="2">
+                                            <complexType>
+                                              <attribute name="Amount" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Amount" is used to specify the tax amount.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="TaxCode" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"TaxCode" is used to specify the tax code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                              <element name="PayLaterPlan" minOccurs="0">
+                                <annotation>
+                                  <documentation>"PayLaterPlan" is only applicable to Brazil, cannot combine with MultipleFOP, or MultipleMiscFOP.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="Fare">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Amount" is used to specify the remaining fare amount.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA,"CK," or "CQ."  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="Installment">
+                                      <complexType>
+                                        <attribute name="Count" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Count" is used to specify the number of installments.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="PayLaterReferenceNumber" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"PayLaterReferenceNumber" is used to specify the pay later reference number.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="Value" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Value" is used to specify the value of the installments.  Please note that decimals are not permitted.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="MultipleCC_FOP" minOccurs="0">
+                          <annotation>
+                            <documentation>Multiple CC_FOP cannot combine with .../BSP_Ticketing, or .../SabreSonicTicketing</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="Fare">
+                                <complexType>
+                                  <attribute name="Amount" type="string" use="required">
+                                    <annotation>
+                                      <documentation>"Amount" is used to specify the amount to be applied to the second CC.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="CC_One">
+                                <complexType>
+                                  <sequence>
+                                    <element name="CC_Info" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="PaymentCard">
+                                            <complexType>
+                                              <attribute name="Code" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="CardSecurityCode" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"CardSecurityCode" is used to specify a credit card Card Security Code number.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                <annotation>
+                                                  <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                <annotation>
+                                                  <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"ManualApprovalCode" is used to specify a manual credit card if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ManualOBFee" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"ManualOBFee" is used to indicate that the manual OB fee should be associated to the card. A manual OB fee can ONLY be added to a ticketing entry that references a PQ that has the PRICE-MANUAL tag at the bottom of the *PQ</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="Number" type="integer" use="required">
+                                                <annotation>
+                                                  <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Suppress" type="boolean" use="optional">
+                                          <annotation>
+                                            <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                              <element name="CC_Two">
+                                <complexType>
+                                  <sequence>
+                                    <element name="CC_Info" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="PaymentCard">
+                                            <complexType>
+                                              <attribute name="Code" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="CardSecurityCode" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"CardSecurityCode" is used to specify a credit card Card Security Code number.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                <annotation>
+                                                  <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                <annotation>
+                                                  <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"ManualApprovalCode" is used to specify a manual credit card if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ManualOBFee" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"ManualOBFee" is used to indicate that the manual OB fee should be associated to the card. A manual OB fee can ONLY be added to a ticketing entry that references a PQ that has the 'PRICE-MANUAL' tag at the bottom of the *PQ</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="Number" type="integer" use="required">
+                                                <annotation>
+                                                  <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Suppress" type="boolean" use="optional">
+                                          <annotation>
+                                            <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="SabreSonicTicketing" minOccurs="0">
+                          <annotation>
+                            <documentation>"SabreSonicTicketing" is only valid for SabreSonic-based airlines, cannot combine with .../BSP_Ticketing, or .../Multiple CC_FOP.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="BasicFOP" minOccurs="0">
+                                <complexType>
+                                  <sequence>
+                                    <element name="CC_Info" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="PaymentCard">
+                                            <complexType>
+                                              <attribute name="CardSecurityCode" type="integer" use="optional">
+                                                <annotation>
+                                                  <documentation>"CardSecurityCode" is used to specify a credit card security code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="Code" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Code" is used to specify a credit card vendor code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                <annotation>
+                                                  <documentation>"ExpireDate" is used to specify a credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                <annotation>
+                                                  <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                <annotation>
+                                                  <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="Number" type="integer" use="required">
+                                                <annotation>
+                                                  <documentation>"Number" is used to specify a credit card number.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Suppress" type="boolean" use="optional">
+                                          <annotation>
+                                            <documentation>"Suppress" is used to specify whether or not to suppress credit card information on an itinerary.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                  <attribute name="ManualApprovalCode" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"ManualApprovalCode" is used to specify a manual approval code for non-credit card forms of payment.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="Type" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA," (cash) "CK," (check) "CQ," (cheque) "PT," "PTACA," (PTA cash) "PTAGTCK." (PTA agency check) or "PTCK" (PTA check).  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node, unless needing to specify a PTA credit card form of payment.  For a PTA credit card form of payment the client should pass Type="PT" and populate the .../CC_Info child node with the relevant credit card information.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="EnhancedMultipleFOP" minOccurs="0">
+                                <annotation>
+                                  <documentation>EnhancedMultipleCC_FOP is only valid for SabreSonic-based airlines who have actived the enhanced multiple form of payment option, cannot combine with .../MultipleFOP.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="Fare">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Amount" is used to specify the fare amount to be applied to the second FOP.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_One">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="CardSecurityCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"CardSecurityCode" is used to specify a credit card security code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional"/>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_Two">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="CardSecurityCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"CardSecurityCode" is used to specify a credit card security code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExpireDate" type="spct:expireDate" use="required">
+                                                      <annotation>
+                                                        <documentation>"ExpireDate" is used to specify the credit card expiration date, follows this format: YYYY-MM.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ExtendedPayment" type="integer" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ExtendedPayment" is used to specify extended payment if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional"/>
+                                      </complexType>
+                                    </element>
+                                    <element name="Taxes">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="Tax">
+                                            <complexType>
+                                              <attribute name="Amount" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Amount" is used to specify the tax amount.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="TaxCode" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"TaxCode" is used to specify the tax code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                              <element name="MultipleFOP" minOccurs="0">
+                                <annotation>
+                                  <documentation>MultipleFOP cannot combine with .../EnhancedMultipleFOP.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="Fare">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required">
+                                          <annotation>
+                                            <documentation>"Amount" is used to specify the fare amount to be applied to the second FOP.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_One">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA," (cash) "CK," (check) "CQ," (cheque) "PT," "PTACA," (PTA cash) "PTAGTCK." (PTA agency check) or "PTCK" (PTA check).  If utilizing a credit card please omit @Type, and populate the .../CC_Info child node, unless needing to specify a PTA credit card form of payment.  For a PTA credit card form of payment the client should pass Type="PT" and populate the .../CC_Info child node with the relevant credit card information.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="FOP_Two">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="CC_Info" minOccurs="0">
+                                            <complexType>
+                                              <sequence>
+                                                <element name="PaymentCard">
+                                                  <complexType>
+                                                    <attribute name="Code" type="string" use="required">
+                                                      <annotation>
+                                                        <documentation>"Code" is used to specify the credit card vendor code.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="ManualApprovalCode" type="string" use="optional">
+                                                      <annotation>
+                                                        <documentation>"ManualApprovalCode" is used to specify a manual credit card approval code if applicable.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                    <attribute name="Number" type="integer" use="required">
+                                                      <annotation>
+                                                        <documentation>"Number" is used to specify the credit card number.</documentation>
+                                                      </annotation>
+                                                    </attribute>
+                                                  </complexType>
+                                                </element>
+                                              </sequence>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                        <attribute name="Type" type="string" use="optional">
+                                          <annotation>
+                                            <documentation>"Type" is used to specify the payment type.  Acceptable values are "CA,"CK," or "CQ."  If utilizing a credit card please omit @Type, and populate the .../CCInfo child node.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                    <element name="Taxes" minOccurs="0">
+                                      <complexType>
+                                        <sequence>
+                                          <element name="Tax">
+                                            <complexType>
+                                              <attribute name="Amount" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"Amount" is used to specify the tax amount.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                              <attribute name="TaxCode" type="string" use="required">
+                                                <annotation>
+                                                  <documentation>"TaxCode" is used to specify the tax code.</documentation>
+                                                </annotation>
+                                              </attribute>
+                                            </complexType>
+                                          </element>
+                                        </sequence>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                  <element name="MiscQualifiers" minOccurs="0">
+                    <complexType>
+                      <sequence>
+                        <element name="AirExtras" minOccurs="0" maxOccurs="unbounded">
+                          <complexType>
+                            <attribute name="EndNumber" type="integer" use="optional">
+                              <annotation>
+                                <documentation>"EndNumber" is used to specify the final EMD number when specifying a range.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Number" type="integer" use="required">
+                              <annotation>
+                                <documentation>"Number" is used to specify and EMD number.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="BaggageAllowance" minOccurs="0">
+                          <annotation>
+                            <documentation>Cannot combine with PhaseIV.</documentation>
+                          </annotation>
+                          <complexType>
+                            <attribute name="Number" type="string" use="optional">
+                              <annotation>
+                                <documentation>"Number" is used to specify the quantity of checked bags if applicable.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Weight" type="string" use="optional">
+                              <annotation>
+                                <documentation>"Weight" is used to specify the weight in kilos of checked bags if applicable.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Certificate" minOccurs="0" maxOccurs="2">
+                          <complexType>
+                            <attribute name="Number" type="string" use="required">
+                              <annotation>
+                                <documentation>"Number" is used to specify a ticket number.  Please note that this qualifier is only applicable to Sabre Sonic-hosted carriers.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Commission" minOccurs="0">
+                          <complexType>
+                            <attribute name="Amount" type="decimal" use="optional">
+                              <annotation>
+                                <documentation>"Amount" is used to specify the numeric amount of commission being claimed if applicable.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Percent" type="decimal" use="optional">
+                              <annotation>
+                                <documentation>"Percent" is used to specify the precentage of commission being claimed if applicable.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="DateOfBirth" minOccurs="0">
+                          <annotation>
+                            <documentation>"DOB" is used to instruct the system to take the passenger's date of birth-related information from the SSR PNR field, and pass it into the host-based ticketing application.  This is required for clients based in the Russian Federation.</documentation>
+                          </annotation>
+                        </element>
+                        <element name="Endorsement" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="Text" type="string"/>
+                            </sequence>
+                            <attribute name="Override" type="boolean" use="optional"/>
+                          </complexType>
+                        </element>
+                        <element name="FutureTicket" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="Line" maxOccurs="unbounded">
+                                <annotation>
+                                  <documentation>"Line" and its associated attributes are used to issue tickets from specific FP lines.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="EndNumber" type="integer" use="optional"/>
+                                  <attribute name="NameNumber" type="string" use="optional"/>
+                                  <attribute name="Number" type="integer" use="required"/>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="Invoice" minOccurs="0">
+                          <annotation>
+                            <documentation>"Invoice" is used to specify to print invoice at time of ticketing.</documentation>
+                          </annotation>
+                          <complexType>
+                            <attribute name="Ind" type="boolean" use="optional"/>
+                            <attribute name="ETReceipt" type="boolean" use="optional"/>
+                          </complexType>
+                        </element>
+                        <element name="NeedPrint" minOccurs="0">
+                          <annotation>
+                            <documentation>Please note that only two of the three attributes can be set to true simultaneously.</documentation>
+                          </annotation>
+                          <complexType>
+                            <attribute name="AuditorCoupon" type="boolean" use="required">
+                              <annotation>
+                                <documentation>"AuditorCoupon" is used to specify to print an auditor coupon.  Please note that this qualifier is only applicable to Sabre Sonic-hosted carriers.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Itinerary" type="boolean" use="required">
+                              <annotation>
+                                <documentation>"Itinerary" is used to specify to print an itinerary.  Please note that this qualifier is only applicable to Sabre Sonic-hosted carriers.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="PassengerReceipt" type="boolean" use="required">
+                              <annotation>
+                                <documentation>"PassengerReceipt" is used to specify to print a passenger receipt.  Please note that this qualifier is only applicable to Sabre Sonic-hosted carriers.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="NetRemit" minOccurs="0">
+                          <complexType>
+                            <attribute name="Amount" type="decimal" use="optional"/>
+                            <attribute name="ContractAgreementCode" type="string" use="optional"/>
+                            <attribute name="NetCreditAmount" type="decimal" use="optional"/>
+                            <attribute name="ValueCode" type="string" use="optional"/>
+                          </complexType>
+                        </element>
+                        <element name="Ticket" minOccurs="0">
+                          <complexType>
+                            <attribute name="Action" type="string" use="optional">
+                              <annotation>
+                                <documentation>"Action" is used to specify an action code.  Please note that this qualifier is only applicable to Sabre Sonic-hosted carriers.</documentation>
+                              </annotation>
+                            </attribute>
+                            <attribute name="Type" type="string" use="optional">
+                              <annotation>
+                                <documentation>"Type" is used to specify the type of ticket to issue. Acceptable values for Type: ETR = electronic ticket (default), EMD= Electronic Miscellaneous Document, XETR = paper ticket, VCR = paper ticket (for airline use only).</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="TourCode" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="SuppressFareReplaceWithBT" minOccurs="0">
+                                <annotation>
+                                  <documentation>This is not applicable to ARC subscribers.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="required">
+                                    <annotation>
+                                      <documentation>"Ind" is used to specify to suppress the fare amount on the ticket and replace with BT.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="SuppressFareReplaceWithIT" minOccurs="0">
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="required">
+                                    <annotation>
+                                      <documentation>"Ind" is used to specify to suppress the fare amount on the ticket and replace with IT.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="SuppressIT" minOccurs="0">
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="required">
+                                    <annotation>
+                                      <documentation>"Ind" is used to specify to to suppress the IT in the tourcode box from printing.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="SuppressITSupressFare" minOccurs="0">
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="required">
+                                    <annotation>
+                                      <documentation>"Ind" is used to specify to specify to suppress IT from printing in the tour box on the ticket and to suppress fare amounts from printing on the ticket.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="Text" type="string" minOccurs="0"/>
+                            </sequence>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                  <element name="PricingQualifiers" minOccurs="0">
+                    <complexType>
+                      <sequence>
+                        <element name="Brand" minOccurs="0" maxOccurs="unbounded">
+                          <annotation>
+                            <documentation>"Brand" is used to specify a brand.  Please note that it's not possible to request more than 1 brand for an entire journey, or for the same segment.</documentation>
+                          </annotation>
+                          <complexType>
+                            <simpleContent>
+                              <extension base="string">
+                                <attribute name="RPH" type="integer" use="optional">
+                                  <annotation>
+                                    <documentation>"RPH" is used to match up with ".../ItineraryOptions/Segment".</documentation>
+                                  </annotation>
+                                </attribute>
+                              </extension>
+                            </simpleContent>
+                          </complexType>
+                        </element>
+                        <element name="FareFocusExclude" minOccurs="0">
+                          <annotation>
+                            <documentation>"FareFocusExclude" is used to exclude fare focus fares based on business rules of the agency. Please note that this qualifier cannot be combined with .../PriceQuote</documentation>
+                          </annotation>
+                          <complexType>
+                            <attribute name="Ind" type="boolean" use="required"/>
+                          </complexType>
+                        </element>
+                        <element name="Fare" minOccurs="0">
+                          <complexType>
+                            <attribute name="Type" type="string" use="required">
+                              <annotation>
+                                <documentation>"Type" is used to specify a fare type.  Acceptable values are "NL" for normal fare, "EX" for special fare, and 'IT" for inclusive tour.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="ItineraryOptions" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="SegmentSelect" minOccurs="0" maxOccurs="unbounded">
+                                <complexType>
+                                  <attribute name="EndNumber" type="integer" use="optional"/>
+                                  <attribute name="Number" type="integer" use="required"/>
+                                  <attribute name="RPH" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"RPH" is used to match up with ".../SpecificFare/@RPH" or .../Brand.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="SideTrip" minOccurs="0">
+                                <annotation>
+                                  <documentation>"SideTrip" is used to instruct the system to price the specified itinerary segments as a side trip.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="EndNumber" type="integer" use="optional"/>
+                                  <attribute name="Number" type="integer" use="required"/>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="NameSelect" minOccurs="0" maxOccurs="unbounded">
+                          <annotation>
+                            <documentation>"NameSelect" is used to instruct the system to price theitinerary based upon a particular name field.</documentation>
+                          </annotation>
+
+                          <complexType>
+                            <attribute name="EndNameNumber" type="string" use="optional"/>
+                            <attribute name="NameNumber" type="string" use="required"/>
+                          </complexType>
+                        </element>
+                        <element name="PhaseIV" minOccurs="0" maxOccurs="7">
+                          <annotation>
+                            <documentation>Cannot combine with .../PriceQuote.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="NameSelect" minOccurs="0" maxOccurs="unbounded">
+                                <annotation>
+                                  <documentation>"NameSelect" is used to instruct the system to price theitinerary based upon a particular name field.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="EndNameNumber" type="string" use="optional"/>
+                                  <attribute name="NameNumber" type="string" use="required"/>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="Number" type="integer" use="required"/>
+                          </complexType>
+                        </element>
+                        <element name="PriceQuote" minOccurs="0" maxOccurs="unbounded">
+                          <annotation>
+                            <documentation>Cannot combine with .../NameSelect. Cannot combine with .../PhaseIV.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="NameSelect" minOccurs="0" maxOccurs="unbounded">
+                                <annotation>
+                                  <documentation>"NameSelect" is used to instruct the system to price theitinerary based upon a particular name field.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="EndNameNumber" type="decimal" use="optional"/>
+                                  <attribute name="NameNumber" type="decimal" use="required"/>
+                                </complexType>
+                              </element>
+                              <element name="Record" minOccurs="0" maxOccurs="unbounded">
+                                <annotation>
+                                  <documentation>In order to specify multiple PQR records to be issued please specify a range or specific record numbers by means of the element repetition. .../Ticketing/PricingQualifiers/PriceQuote/Record/@Reissue cannot be combined with .../Ticketing/MiscQualifiers/Ticket</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="EndNumber" type="integer" use="optional">
+                                    <annotation>
+                                      <documentation>"EndNumber" is used to specify the ending PQ number in a range.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="Number" type="integer" use="required">
+                                    <annotation>
+                                      <documentation>"Number" is used to specify a PQ number.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="Reissue" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"Reissue" is used to indicate that the particular PQ record is a PQ Reissue record.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="RefundableBalance" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="Taxes" minOccurs="0">
+                                <complexType>
+                                  <sequence>
+                                    <element name="Tax" maxOccurs="unbounded">
+                                      <complexType>
+                                        <attribute name="Amount" type="string" use="required"/>
+                                        <attribute name="Code" type="string" use="required"/>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="Amount" type="string" use="required"/>
+                          </complexType>
+                        </element>
+                        <element name="SpanishLargeFamilyDiscountLevel" minOccurs="0">
+                          <annotation>
+                            <documentation>"SpanishLargeFamilyDiscountLevel" is used to specify the Spanish large family discount level. Please note that this qualifier is only applicable to Spain-based subscribers.</documentation>
+                          </annotation>
+                          <simpleType>
+                            <restriction base="string">
+                              <enumeration value="1"/>
+                              <enumeration value="2"/>
+                            </restriction>
+                          </simpleType>
+                        </element>
+                        <element name="SpecificFare" minOccurs="0" maxOccurs="unbounded">
+                          <annotation>
+                            <documentation>Please note that the element is only applicable to Abacus.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="FareBasis" type="string" minOccurs="0"/>
+                            </sequence>
+                            <attribute name="RPH" type="string" use="optional">
+                              <annotation>
+                                <documentation>"RPH" is used to match up with ../OptionalQualifiers/PricingQualifiers/ItineraryOptions/Segment.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="SpecificPenalty" minOccurs="0">
+                          <annotation>
+                            <documentation>"SpecificPenalty" is used to specify change or cancellation amounts for an itinerary.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="Changeable" minOccurs="0">
+                                <annotation>
+                                  <documentation>It is not possible to combine "BeforeDeparture" and "AfterDeparture" within one element.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="Any" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"Any" is used to specify only changeable fare options.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="CurrencyCode" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"CurrencyCode" is used to specify the specific currency for maximum exchange penalty.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="MaxPenalty" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"MaxPenalty" is used to specify maximum change penalty. If a value of "0" is input no penalty is preferred. If a value of "N" is input only non-changeable options are requested. Please note that monetary amount that includes a decimal is not allowed</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="BeforeDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"BeforeDeparture" is used to query for before depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="AfterDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"AfterDeparture" is used to query for after depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="EitherOr" minOccurs="0">
+                                <annotation>
+                                  <documentation>It is not possible to combine "BeforeDeparture" and "AfterDeparture" within one element.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="Any" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"Any" is used to specify only changeable fare options.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="CurrencyCode" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"CurrencyCode" is used to specify the specific currency for maximum exchange penalty.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="MaxPenalty" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"MaxPenalty" is used to specify maximum change penalty. If a value of "0" is input no penalty is preferred. If a value of "N" is input only non-changeable options are requested. Please note that monetary amount that includes a decimal is not allowed</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="BeforeDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"BeforeDeparture" is used to query for before depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="AfterDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"AfterDeparture" is used to query for after depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                              <element name="Refundable" minOccurs="0">
+                                <annotation>
+                                  <documentation>It is not possible to combine "BeforeDeparture" and "AfterDeparture" within one element.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="Any" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"Any" is used to specify only changeable fare options.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="CurrencyCode" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"CurrencyCode" is used to specify the specific currency for maximum exchange penalty.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="MaxPenalty" type="string" use="optional">
+                                    <annotation>
+                                      <documentation>"MaxPenalty" is used to specify maximum change penalty. If a value of "0" is input no penalty is preferred. If a value of "N" is input only non-changeable options are requested. Please note that monetary amount that includes a decimal is not allowed</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="BeforeDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"BeforeDeparture" is used to query for before depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                  <attribute name="AfterDeparture" type="boolean" use="optional">
+                                    <annotation>
+                                      <documentation>"AfterDeparture" is used to query for after depature fees.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="AdditionalInfo" type="boolean" use="optional">
+                              <annotation>
+                                <documentation>"AdditionalInfo" is used to receive additional tags with information on fare flexibility.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Taxes" minOccurs="0">
+                          <complexType>
+                            <sequence>
+                              <element name="NoTax" minOccurs="0">
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="optional"/>
+                                </complexType>
+                              </element>
+                              <element name="TaxExempt" minOccurs="0" maxOccurs="5">
+                                <complexType>
+                                  <attribute name="Code" type="string" use="optional"/>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                        <element name="ValidityDates" minOccurs="0" maxOccurs="unbounded">
+                          <annotation>
+                            <documentation>This node is used to specify ticket validity dates.Cannot combine with PhaseIV.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="NotValidAfter" type="spct:date" minOccurs="0"/>
+                              <element name="NotValidBefore" type="spct:date" minOccurs="0"/>
+                              <element name="Segment" maxOccurs="unbounded">
+                                <complexType>
+                                  <attribute name="EndNumber" type="integer" use="optional"/>
+                                  <attribute name="Number" type="integer" use="required"/>
+                                </complexType>
+                              </element>
+                            </sequence>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                </sequence>
+              </complexType>
+            </element>
+            <element name="PostProcessing" minOccurs="0">
+              <complexType>
+                <sequence>
+                  <element name="EndTransaction" minOccurs="0">
+                    <annotation>
+                      <documentation>"EndTransaction" is used to end the transaction and finalize the record.</documentation>
+                    </annotation>
+                    <complexType>
+                      <sequence>
+                        <element name="Source">
+                          <complexType>
+                            <attribute name="ReceivedFrom" type="string" use="required">
+                              <annotation>
+                                <documentation>"ReceivedFrom" is used to receive the record.</documentation>
+                              </annotation>
+                            </attribute>
+                          </complexType>
+                        </element>
+                        <element name="Email" minOccurs="0">
+                          <annotation>
+                            <documentation>"Email" is used to send an email notification upon end transaction to any email addresses contained within the particular record.</documentation>
+                          </annotation>
+                          <complexType>
+                            <sequence>
+                              <element name="eTicket" minOccurs="0">
+                                <annotation>
+                                  <documentation>"eTicket" is used to send an email notification containing a text-based copy of the eTicket, cannot combine with .../Invoice, or .../Itinerary..</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="PDF" minOccurs="0">
+                                      <complexType>
+                                        <attribute name="Ind" type="boolean" use="required"/>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                  <attribute name="Ind" type="boolean" use="required"/>
+                                </complexType>
+                              </element>
+                              <element name="Invoice" minOccurs="0">
+                                <annotation>
+                                  <documentation>"Invoice" is used to send an email notification containing a text-based copy of the invoice. Invoice cannot combine with .../eTicket, or .../Itinerary.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <attribute name="Ind" type="boolean" use="required"/>
+                                </complexType>
+                              </element>
+                              <element name="Itinerary" minOccurs="0">
+                                <annotation>
+                                  <documentation>"Itinerary" is used to send an email notification containing a text-based copy of the itinerary. Itinerary cannot combine with .../eTicket, or .../Invoice.</documentation>
+                                </annotation>
+                                <complexType>
+                                  <sequence>
+                                    <element name="PDF" minOccurs="0">
+                                      <annotation>
+                                        <documentation>"PDF" is used to send an email notification containing a PDF-based copy of the itinerary.</documentation>
+                                      </annotation>
+                                      <complexType>
+                                        <attribute name="Ind" type="boolean" use="required"/>
+                                      </complexType>
+                                    </element>
+                                    <element name="Segment" minOccurs="0" maxOccurs="unbounded">
+                                      <complexType>
+                                        <attribute name="EndNumber" type="integer" use="optional">
+                                          <annotation>
+                                            <documentation>"EndNumber" is used to specify an ending segment in the range to include in the email message.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                        <attribute name="Number" type="integer" use="required">
+                                          <annotation>
+                                            <documentation>"Number" is used to specify a segment number to include in the email message.</documentation>
+                                          </annotation>
+                                        </attribute>
+                                      </complexType>
+                                    </element>
+                                  </sequence>
+                                  <attribute name="Ind" type="boolean" use="required"/>
+                                </complexType>
+                              </element>
+                              <element name="PersonName" minOccurs="0">
+                                <complexType>
+                                  <attribute name="NameNumber" type="string" use="required">
+                                    <annotation>
+                                      <documentation>"NameNumber" is used to specify a particular passenger name number to send the email notification to.  Please note that the email address in the PNR's email field must be name associated to the specified name number.</documentation>
+                                    </annotation>
+                                  </attribute>
+                                </complexType>
+                              </element>
+                            </sequence>
+                            <attribute name="Ind" type="boolean" use="required"/>
+                          </complexType>
+                        </element>
+                      </sequence>
+                    </complexType>
+                  </element>
+                </sequence>
+                <attribute name="acceptNegotiatedFare" type="boolean" use="optional">
+                  <annotation>
+                    <documentation>"acceptNegotiatedFare" is used to accept a negotiated fare when it is not possible to ticket the stored fare.</documentation>
+                  </annotation>
+                </attribute>
+                <attribute name="acceptPriceChanges" type="boolean" use="optional">
+                  <annotation>
+                    <documentation>"acceptPriceChanges" is used to specify that system should issue a ticket even if price increases while processing.</documentation>
+                  </annotation>
+                </attribute>
+                <attribute name="actionOnPQExpired" use="optional">
+                  <annotation>
+                    <documentation>"actionOnPQExpired" is used to specify appropriate action when Price Quote expires. Available options are "R" - reprice, "Q" Quit, "O" Override.</documentation>
+                  </annotation>
+                  <simpleType>
+                    <restriction base="string">
+                      <enumeration value="O"/>
+                      <enumeration value="Q"/>
+                      <enumeration value="R"/>
+                    </restriction>
+                  </simpleType>
+                </attribute>
+              </complexType>
+            </element>
+          </sequence>
+          <attribute name="targetCity" type="string" use="optional">
+            <annotation>
+              <documentation>"TargetCity" is used to specify to which city service should change context using ContextChange (AAA) and the rest of the service uses new security. If empty or equals current city the context doesn't change.</documentation>
+            </annotation>
+          </attribute>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+</schema>
