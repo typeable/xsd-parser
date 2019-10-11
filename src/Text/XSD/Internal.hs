@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | A subset of XSD specification.
@@ -171,10 +172,14 @@ type QName = (Maybe Namespace, LocalName)
 --   deriving (Show)
 
 data Element = Element
-  { name     :: QName
-  , xtype    :: DatatypeRef
+  { name      :: !QName
+  , xtype     :: !DatatypeRef
+  , minOccurs :: !Int
+  , maxOccurs :: !(Maybe Int)
   } deriving (Show, Eq)
 
+type DatatypeMap = M.Map Text Datatype
+
 -- | Embodies an XSD document
-newtype XSD = XSD { unXSD :: [Element] }
+newtype XSD = XSD { unXSD :: ([Element], DatatypeMap) }
   deriving (Show, Eq)

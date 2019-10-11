@@ -26,7 +26,8 @@ library
 
   default-extensions:  OverloadedStrings
                      , LambdaCase
-  other-extensions:    TemplateHaskell
+                     , QuasiQuotes
+                     , TemplateHaskell
 
   -- Other library packages from which modules are imported.
   build-depends:       base ^>=4.12.0.0
@@ -35,8 +36,10 @@ library
                      , lens >= 4.13
                      , mtl
                      , text
+                     , template-haskell
                      , transformers
                      , xml-conduit
+                     , xml-isogen
                      , writer-cps-mtl
                      , uniplate
 

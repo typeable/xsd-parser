@@ -1,3 +1,6 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Text.XSD.Parser where
 
 import Control.Exception
@@ -23,10 +26,10 @@ newtype XSDException = XSDException String
 
 instance Exception XSDException
 
-type XSDMonad a = WriterT (M.Map Text Datatype) (Either SomeException) a
+type XSDMonad a = WriterT DatatypeMap (Either SomeException) a
 
 parseXSD :: ParseSettings -> ByteString -> Either SomeException XSD
-parseXSD ps bs = parseLBS ps bs >>= fmap fst . toXsd
+parseXSD ps bs = parseLBS ps bs >>= toXsd
 
 -- Show is Meh
 throwXsd :: Show s => s -> XSDMonad a
@@ -51,13 +54,6 @@ toElemsAndDatatypes cursor = do
       throwXsd $ "unnamed type ref for datatype: " <> show datatype
   pure elems
 
-toSchema :: XML.Cursor -> XSDMonad XSD
-toSchema cursor = do
-  let topLevel = cursor $| laxElement "schema"
-  if P.null topLevel
-  then throwXsd "Top-level schema definition not found"
-  else XSD <$> toElemsAndDatatypes cursor
-
 safeHead :: [a] -> Maybe a
 safeHead []    = Nothing
 safeHead (a:_) = Just a
@@ -74,6 +70,9 @@ toElem cursor = do
           ns        = nameNamespace $ elementName el
         name <- attrThrowXsd "name" el
           $ "Expected attribute 'name' for element: " <> show (node cursor)
+        let
+          minOc = maybe 0 (read . T.unpack) (M.lookup "minOccurs" attrs)
+          maxOc = read . T.unpack <$> M.lookup "maxOccurs" attrs
         datatypeRef <- case mAttrType of
           Just dtn -> pure $ DatatypeRef dtn
           Nothing  -> do
@@ -86,8 +85,10 @@ toElem cursor = do
               let name = safeHead $ childCursor $| attribute "name"
               InlineComplex . TypeComplex <$> toComplexType childCursor
         pure $ XSD.Element
-          { name     = (ns, name)
-          , xtype    = datatypeRef }
+          { name      = (ns, name)
+          , xtype     = datatypeRef
+          , minOccurs = minOc
+          , maxOccurs = maxOc }
       e            -> throwXsd $ "[toElem] xsd node not supported: " <> show e
     e              ->
       throwXsd $ "[toElem] element expected, got: " <> show e
@@ -174,5 +175,11 @@ toAttribute cursor = do
       Nothing -> Optional
   pure $ Attribute name simpleType useProp
 
-toXsd :: Document -> Either SomeException (XSD, M.Map Text Datatype)
-toXsd doc = runWriterT $ toSchema (fromDocument doc)
+toXsd :: Document -> Either SomeException XSD
+toXsd doc = do
+  let cursor = fromDocument doc
+  XSD <$> (runWriterT $ do
+    let topLevel = cursor $| laxElement "schema"
+    if P.null topLevel
+    then throwXsd "Top-level schema definition not found"
+    else toElemsAndDatatypes cursor)
