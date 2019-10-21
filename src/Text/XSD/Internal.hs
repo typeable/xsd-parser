@@ -48,52 +48,52 @@ data ModelGroupSchema
   | CTAll [Element]
   deriving (Show, Eq)
 
-fromSimpleTypeStr :: Text -> Either String SimpleAtomicType
-fromSimpleTypeStr "anyURI"             = Right $ STAnyURI
-fromSimpleTypeStr "base64Binary"       = Right $ STBase64Binary
-fromSimpleTypeStr "boolean"            = Right $ STBoolean
-fromSimpleTypeStr "date"               = Right $ STDate
-fromSimpleTypeStr "datetime"           = Right $ STDateTime
-fromSimpleTypeStr "dateTimeStamp"      = Right $ STDateTimeStamp
-fromSimpleTypeStr "decimal"            = Right $ STDecimal DTDecimal
-fromSimpleTypeStr "integer"            = Right $ STDecimal DTInteger
-fromSimpleTypeStr "long"               = Right $ STDecimal DTLong
-fromSimpleTypeStr "int"                = Right $ STDecimal DTInt
-fromSimpleTypeStr "short"              = Right $ STDecimal DTShort
-fromSimpleTypeStr "byte"               = Right $ STDecimal DTByte
-fromSimpleTypeStr "nonNegativeInteger" = Right $ STDecimal DTNonNegativeInteger
-fromSimpleTypeStr "positiveInteger"    = Right $ STDecimal DTPositiveInteger
-fromSimpleTypeStr "unsignedLong"       = Right $ STDecimal DTUnsignedLong
-fromSimpleTypeStr "unsignedInt"        = Right $ STDecimal DTUnsignedInt
-fromSimpleTypeStr "unsignedShort"      = Right $ STDecimal DTUnsignedShort
-fromSimpleTypeStr "unsignedByte"       = Right $ STDecimal DTUnsignedByte
-fromSimpleTypeStr "nonPositiveInteger" = Right $ STDecimal DTNonPositiveInteger
-fromSimpleTypeStr "negativeInteger"    = Right $ STDecimal DTNegativeInteger
-fromSimpleTypeStr "float"              = Right $ STFloat
-fromSimpleTypeStr "gDay"               = Right $ STGDay
-fromSimpleTypeStr "gMonth"             = Right $ STGMonth
-fromSimpleTypeStr "gMonthDay"          = Right $ STGMonthDay
-fromSimpleTypeStr "gYear"              = Right $ STGYear
-fromSimpleTypeStr "gYearMonth"         = Right $ STGYearMonth
-fromSimpleTypeStr "hexBinary"          = Right $ STHexBinary
-fromSimpleTypeStr "NOTATION"           = Right $ STNOTATION
-fromSimpleTypeStr "QName"              = Right $ STQName
-fromSimpleTypeStr "string"             = Right $ STString StrString
-fromSimpleTypeStr "normalizedString"   = Right $ STString StrNormalizedString
-fromSimpleTypeStr "token"              = Right $ STString StrToken
-fromSimpleTypeStr "language"           = Right $ STString StrLanguage
-fromSimpleTypeStr "Name"               = Right $ STString StrName
-fromSimpleTypeStr "NCName"             = Right $ STString StrNCName
-fromSimpleTypeStr "ENTITY"             = Right $ STString StrENTITY
-fromSimpleTypeStr "ID"                 = Right $ STString StrID
-fromSimpleTypeStr "IDREF"              = Right $ STString StrIDREF
-fromSimpleTypeStr "NMTOKEN"            = Right $ STString StrNMTOKEN
-fromSimpleTypeStr "time"               = Right $ STTime
-fromSimpleTypeStr t                    = Left $ "unsupported type: " <> T.unpack t
+fromSimpleTypeStr :: QName -> Either String SimpleAtomicType
+fromSimpleTypeStr (_, "anyURI")            = Right $ STAnyURI
+fromSimpleTypeStr (_, "base64Binary")      = Right $ STBase64Binary
+fromSimpleTypeStr (_, "boolean")           = Right $ STBoolean
+fromSimpleTypeStr (_, "date")              = Right $ STDate
+fromSimpleTypeStr (_, "datetime")          = Right $ STDateTime
+fromSimpleTypeStr (_, "dateTimeStamp")     = Right $ STDateTimeStamp
+fromSimpleTypeStr (_, "decimal")           = Right $ STDecimal DTDecimal
+fromSimpleTypeStr (_, "integer")           = Right $ STDecimal DTInteger
+fromSimpleTypeStr (_, "long")              = Right $ STDecimal DTLong
+fromSimpleTypeStr (_, "int")               = Right $ STDecimal DTInt
+fromSimpleTypeStr (_, "short")             = Right $ STDecimal DTShort
+fromSimpleTypeStr (_, "byte")              = Right $ STDecimal DTByte
+fromSimpleTypeStr (_, "nonNegativeInteger")= Right $ STDecimal DTNonNegativeInteger
+fromSimpleTypeStr (_, "positiveInteger")   = Right $ STDecimal DTPositiveInteger
+fromSimpleTypeStr (_, "unsignedLong")      = Right $ STDecimal DTUnsignedLong
+fromSimpleTypeStr (_, "unsignedInt")       = Right $ STDecimal DTUnsignedInt
+fromSimpleTypeStr (_, "unsignedShort")     = Right $ STDecimal DTUnsignedShort
+fromSimpleTypeStr (_, "unsignedByte")      = Right $ STDecimal DTUnsignedByte
+fromSimpleTypeStr (_, "nonPositiveInteger")= Right $ STDecimal DTNonPositiveInteger
+fromSimpleTypeStr (_, "negativeInteger")   = Right $ STDecimal DTNegativeInteger
+fromSimpleTypeStr (_, "float")             = Right $ STFloat
+fromSimpleTypeStr (_, "gDay")              = Right $ STGDay
+fromSimpleTypeStr (_, "gMonth")            = Right $ STGMonth
+fromSimpleTypeStr (_, "gMonthDay")         = Right $ STGMonthDay
+fromSimpleTypeStr (_, "gYear")             = Right $ STGYear
+fromSimpleTypeStr (_, "gYearMonth")        = Right $ STGYearMonth
+fromSimpleTypeStr (_, "hexBinary")         = Right $ STHexBinary
+fromSimpleTypeStr (_, "NOTATION")          = Right $ STNOTATION
+fromSimpleTypeStr (_, "QName")             = Right $ STQName
+fromSimpleTypeStr (_, "string")            = Right $ STString StrString
+fromSimpleTypeStr (_, "normalizedString")  = Right $ STString StrNormalizedString
+fromSimpleTypeStr (_, "token")             = Right $ STString StrToken
+fromSimpleTypeStr (_, "language")          = Right $ STString StrLanguage
+fromSimpleTypeStr (_, "Name")              = Right $ STString StrName
+fromSimpleTypeStr (_, "NCName")            = Right $ STString StrNCName
+fromSimpleTypeStr (_, "ENTITY")            = Right $ STString StrENTITY
+fromSimpleTypeStr (_, "ID")                = Right $ STString StrID
+fromSimpleTypeStr (_, "IDREF")             = Right $ STString StrIDREF
+fromSimpleTypeStr (_, "NMTOKEN")           = Right $ STString StrNMTOKEN
+fromSimpleTypeStr (_, "time")              = Right $ STTime
+fromSimpleTypeStr (_, t)                   = Left $ "unsupported type: " <> T.unpack t
 
 -- | ENTITIES, IDREFS and NMTOKENS are not supported right now.
 data SimpleType
-  = STAtomic SimpleAtomicType [Restriction]
+  = STAtomic Text SimpleAtomicType [Restriction]
   -- STUnion [SimpleType] -- special - xs:union
   -- STList [SimpleType]  -- special - xs:list
   deriving (Show, Eq)
@@ -162,6 +162,13 @@ type LocalName = Text
 type Namespace = Text
 
 type QName = (Maybe Namespace, LocalName)
+
+toQName :: Text -> QName
+toQName n =
+  let splitName@(f:l) = T.split (==':') n
+  in if Prelude.length splitName == 1
+    then (Nothing, f)
+    else (Just f, Prelude.head l)
 
 -- | Based on https://www.w3.org/TR/xmlschema11-1/#concepts-data-model
 -- Secondary and helper schema components are not supported right now.

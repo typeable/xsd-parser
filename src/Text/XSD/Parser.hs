@@ -46,12 +46,15 @@ attrThrowXsd name elNode = maybeThrowXsd (M.lookup name $ elementAttributes elNo
 toElemsAndDatatypes :: XML.Cursor -> XSDMonad [XSD.Element]
 toElemsAndDatatypes cursor = do
   elems <- traverse toElem (cursor $/ laxElement "element")
-  datatypes <- traverse toComplexType (cursor $/ laxElement "complexType")
-  for_ datatypes $ \case
+  complexDatatypes <- traverse toComplexType (cursor $/ laxElement "complexType")
+  for_ complexDatatypes $ \case
     datatype@(ComplexType (Just name) _ _) ->
       tell (M.singleton name (TypeComplex datatype))
     datatype@(ComplexType Nothing _  _) ->
       throwXsd $ "unnamed type ref for datatype: " <> show datatype
+  simpleTypes <- traverse toSimpleType (cursor $/ laxElement "simpleType")
+  for_ simpleTypes $ \simpleType@(STAtomic name _ _) ->
+    tell (M.singleton name (TypeSimple simpleType))
   pure elems
 
 safeHead :: [a] -> Maybe a
@@ -105,6 +108,9 @@ toElem cursor = do
 
 toSimpleType :: Cursor -> XSDMonad SimpleType
 toSimpleType cursor = do
+  name <- maybeThrowXsd
+    (safeHead $ cursor $| attribute "name")
+    $ "More than one \"name\" attribute in simpleType declaration"
   let restrictionAxis = laxElement "restriction"
   if P.null (cursor $// restrictionAxis)
   then throwXsd $ "unsupported simpleType element: " <> show cursor
@@ -116,10 +122,10 @@ toSimpleType cursor = do
     let
       enumValues = childCursor $// laxElement "enumeration" &/ attribute "value"
     -- only enumeration is supported now
-    case fromSimpleTypeStr baseType of
+    case fromSimpleTypeStr $ toQName baseType of
       Left e                  -> throwXsd e
       Right simpleAtomicType  ->
-        pure $ STAtomic simpleAtomicType
+        pure $ STAtomic name simpleAtomicType
           $ if P.null enumValues then [] else [Enumeration enumValues]
 
 -- | Takes a cursor to the 'xs:complexType' element.
@@ -159,9 +165,10 @@ toAttribute cursor = do
     $ "No name attribute found in child <attribute> of: "
       <> show (cursor $| ancestor <=< ancestor)
   simpleType <- case safeHead $ cursor $| attribute "type" of
-    Just simpleAtomicType -> case fromSimpleTypeStr simpleAtomicType of
-      Left e                  -> throwXsd e
-      Right simpleAtomicType  -> pure $ STAtomic simpleAtomicType []
+    Just simpleAtomicType ->
+      case fromSimpleTypeStr $ toQName simpleAtomicType of
+        Left e                  -> throwXsd e
+        Right simpleAtomicType  -> pure $ STAtomic name simpleAtomicType []
     Nothing -> do
       let simpleTypeCursor = safeHead $ cursor $// laxElement "simpleType"
       case simpleTypeCursor of
