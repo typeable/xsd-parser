@@ -18,7 +18,7 @@ data Datatype
   deriving (Show, Eq)
 
 data ComplexType
-  = ComplexType (Maybe Text) [Attribute] (Maybe ModelGroupSchema)
+  = ComplexType (Maybe Text) [Attribute] [Annotation] (Maybe ModelGroupSchema)
   deriving (Show, Eq)
 
 data Attribute = Attribute Text SimpleType UseProp
@@ -35,6 +35,10 @@ fromUsePropStr "optional"   = Just $ Optional
 fromUsePropStr "required"   = Just $ Required
 fromUsePropStr "prohibited" = Just $ Prohibited
 fromUsePropStr _            = Nothing
+
+data Annotation
+  = Documentation Text
+  deriving (Show, Eq)
 
 data DatatypeRef
   = InlineComplex Datatype
@@ -93,7 +97,7 @@ fromSimpleTypeStr (_, t)                   = Left $ "unsupported type: " <> T.un
 
 -- | ENTITIES, IDREFS and NMTOKENS are not supported right now.
 data SimpleType
-  = STAtomic Text SimpleAtomicType [Restriction]
+  = STAtomic Text SimpleAtomicType [Annotation] [Restriction]
   -- STUnion [SimpleType] -- special - xs:union
   -- STList [SimpleType]  -- special - xs:list
   deriving (Show, Eq)
@@ -179,10 +183,11 @@ toQName n =
 --   deriving (Show)
 
 data Element = Element
-  { name      :: !QName
-  , xtype     :: !DatatypeRef
-  , minOccurs :: !Int
-  , maxOccurs :: !(Maybe Int)
+  { name        :: !QName
+  , xtype       :: !DatatypeRef
+  , minOccurs   :: Int
+  , maxOccurs   :: (Maybe Int)
+  , annotations :: [Annotation]
   } deriving (Show, Eq)
 
 type DatatypeMap = M.Map Text Datatype

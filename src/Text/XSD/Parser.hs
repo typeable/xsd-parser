@@ -48,18 +48,26 @@ toElemsAndDatatypes cursor = do
   elems <- traverse toElem (cursor $/ laxElement "element")
   complexDatatypes <- traverse toComplexType (cursor $/ laxElement "complexType")
   for_ complexDatatypes $ \case
-    datatype@(ComplexType (Just name) _ _) ->
+    datatype@(ComplexType (Just name) _ _ _) ->
       tell (M.singleton name (TypeComplex datatype))
-    datatype@(ComplexType Nothing _  _) ->
+    datatype@(ComplexType Nothing _ _ _) ->
       throwXsd $ "unnamed type ref for datatype: " <> show datatype
   simpleTypes <- traverse toSimpleType (cursor $/ laxElement "simpleType")
-  for_ simpleTypes $ \simpleType@(STAtomic name _ _) ->
+  for_ simpleTypes $ \simpleType@(STAtomic name _ _ _) ->
     tell (M.singleton name (TypeSimple simpleType))
   pure elems
 
 safeHead :: [a] -> Maybe a
 safeHead []    = Nothing
 safeHead (a:_) = Just a
+
+getDocumentation :: Cursor -> [Annotation]
+getDocumentation cursor = Documentation <$> documentation
+  where
+    documentation = cursor
+      $/ laxElement "annotation"
+      &// laxElement "documentation"
+      &/ content
 
 -- | Takes a cursor to the element itself.
 toElem :: Cursor -> XSDMonad XSD.Element
@@ -74,8 +82,8 @@ toElem cursor = do
         name <- attrThrowXsd "name" el
           $ "Expected attribute 'name' for element: " <> show (node cursor)
         let
-          minOc = maybe 0 (read . T.unpack) (M.lookup "minOccurs" attrs)
-          maxOc = read . T.unpack <$> M.lookup "maxOccurs" attrs
+          minOc         = maybe 0 (read . T.unpack) (M.lookup "minOccurs" attrs)
+          maxOc         = read . T.unpack <$> M.lookup "maxOccurs" attrs
         datatypeRef <- case mAttrType of
           Just dtn -> pure $ DatatypeRef dtn
           Nothing  -> do
@@ -88,23 +96,14 @@ toElem cursor = do
               let name = safeHead $ childCursor $| attribute "name"
               InlineComplex . TypeComplex <$> toComplexType childCursor
         pure $ XSD.Element
-          { name      = (ns, name)
-          , xtype     = datatypeRef
-          , minOccurs = minOc
-          , maxOccurs = maxOc }
+          { name        = (ns, name)
+          , xtype       = datatypeRef
+          , minOccurs   = minOc
+          , maxOccurs   = maxOc
+          , annotations = getDocumentation cursor }
       e            -> throwXsd $ "[toElem] xsd node not supported: " <> show e
     e              ->
       throwXsd $ "[toElem] element expected, got: " <> show e
-
--- toDatatype :: Cursor -> XSDMonad Datatype
--- toDatatype cursor = do
---   case node cursor of
---     NodeElement el -> case nameLocalName (elementName el) of
---       "simpleType"  -> TypeSimple <$> toSimpleType cursor
---       "complexType" -> TypeComplex <$> toComplexType cursor
---       e             -> throwXsd $ "[toDatatype] xsd node not supported: " <> show e
---     e              ->
---       throwXsd $ "[toDatatype] element expected, got: " <> show e
 
 toSimpleType :: Cursor -> XSDMonad SimpleType
 toSimpleType cursor = do
@@ -126,6 +125,7 @@ toSimpleType cursor = do
       Left e                  -> throwXsd e
       Right simpleAtomicType  ->
         pure $ STAtomic name simpleAtomicType
+          (getDocumentation cursor)
           $ if P.null enumValues then [] else [Enumeration enumValues]
 
 -- | Takes a cursor to the 'xs:complexType' element.
@@ -137,6 +137,7 @@ toComplexType cursor = do
   let allAxis       = laxElement "all"
   -- attributes
   attrs <- traverse toAttribute (cursor $// attributeAxis)
+  let ann  = getDocumentation cursor
   -- group model schemas
   if P.null (cursor $// sequenceAxis)
   then if P.null (cursor $// choiceAxis)
@@ -146,29 +147,33 @@ toComplexType cursor = do
       else do
         childCursor <- maybeThrowXsd (safeHead $ cursor $// allAxis)
           $ "Unexpected number of xs:all tags in: " <> show cursor
-        let name = safeHead $ cursor $| attribute "name"
-        ComplexType name attrs . Just . CTAll <$> toElemsAndDatatypes childCursor
+        let
+           name = safeHead $ cursor $| attribute "name"
+        ComplexType name attrs ann . Just . CTAll <$> toElemsAndDatatypes childCursor
     else do
       childCursor <- maybeThrowXsd (safeHead $ cursor $// choiceAxis)
         $ "Unexpected number of xs:choice tags in: " <> show cursor
-      let name = safeHead $ cursor $| attribute "name"
-      ComplexType name attrs . Just . CTChoice <$> toElemsAndDatatypes childCursor
+      let
+        name = safeHead $ cursor $| attribute "name"
+      ComplexType name attrs ann . Just . CTChoice <$> toElemsAndDatatypes childCursor
   else do
     childCursor <- maybeThrowXsd (safeHead $ cursor $// sequenceAxis)
       $ "Unexpected number of xs:sequence tags in: " <> show cursor
-    let name = safeHead $ cursor $| attribute "name"
-    ComplexType name attrs . Just . CTSequence <$> toElemsAndDatatypes childCursor
+    let
+      name = safeHead $ cursor $| attribute "name"
+    ComplexType name attrs ann . Just . CTSequence <$> toElemsAndDatatypes childCursor
 
 toAttribute :: XML.Cursor -> XSDMonad Attribute
 toAttribute cursor = do
   name <- maybeThrowXsd (safeHead $ cursor $| attribute "name")
     $ "No name attribute found in child <attribute> of: "
       <> show (cursor $| ancestor <=< ancestor)
+  let ann = getDocumentation cursor
   simpleType <- case safeHead $ cursor $| attribute "type" of
     Just simpleAtomicType ->
       case fromSimpleTypeStr $ toQName simpleAtomicType of
         Left e                  -> throwXsd e
-        Right simpleAtomicType  -> pure $ STAtomic name simpleAtomicType []
+        Right simpleAtomicType  -> pure $ STAtomic name simpleAtomicType ann []
     Nothing -> do
       let simpleTypeCursor = safeHead $ cursor $// laxElement "simpleType"
       case simpleTypeCursor of
