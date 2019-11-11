@@ -185,8 +185,8 @@ toQName n =
 data Element = Element
   { name        :: !QName
   , xtype       :: !DatatypeRef
-  , minOccurs   :: Int
-  , maxOccurs   :: (Maybe Int)
+  , minOccurs   :: !Int
+  , maxOccurs   :: !Int
   , annotations :: [Annotation]
   } deriving (Show, Eq)
 

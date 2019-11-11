@@ -82,8 +82,10 @@ toElem cursor = do
         name <- attrThrowXsd "name" el
           $ "Expected attribute 'name' for element: " <> show (node cursor)
         let
-          minOc         = maybe 0 (read . T.unpack) (M.lookup "minOccurs" attrs)
-          maxOc         = read . T.unpack <$> M.lookup "maxOccurs" attrs
+          -- https://www.w3.org/TR/xmlschema-1/#cElement_Declarations
+          -- https://www.w3.org/TR/xmlschema-1/#declare-element
+          minOc         = maybe 1 (read . T.unpack) (M.lookup "minOccurs" attrs)
+          maxOc         = maybe 1 (read . T.unpack) (M.lookup "maxOccurs" attrs)
         datatypeRef <- case mAttrType of
           Just dtn -> pure $ DatatypeRef dtn
           Nothing  -> do
