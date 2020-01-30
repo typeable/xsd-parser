@@ -18,16 +18,10 @@ extra-source-files:  CHANGELOG.md
 
 
 library
-  -- ghc-options:         -Werror
   -- Modules exported by the library.
-  exposed-modules:     Text.XSD
-                     , Text.XSD.Parser
-                     , Text.XSD.Internal
-
-  default-extensions:  OverloadedStrings
-                     , LambdaCase
-                     , QuasiQuotes
-                     , TemplateHaskell
+  exposed-modules:     Xsd
+                     , Xsd.Types
+                     , Xsd.Parser
 
   -- Other library packages from which modules are imported.
   build-depends:       base ^>=4.12.0.0
@@ -41,9 +35,14 @@ library
                      , xml-conduit
                      , writer-cps-mtl
                      , uniplate
+                     , network-uri
+                     , http-client
+                     , http-client-tls
+                     , filepath
 
   -- Directories containing source files.
   hs-source-dirs:      src
+  ghc-options:        -Wall
 
   -- Base language which the package is written in.
   default-language:    Haskell2010
@@ -52,20 +51,14 @@ test-suite spec
   type:               exitcode-stdio-1.0
   hs-source-dirs:     test
   main-is:            Main.hs
+  other-modules:      Spec
   build-depends:      base
                     , bytestring
+                    , text
                     , hspec
                     , transformers
                     , xml-conduit
+                    , containers
                     , xsd-parser
   default-language:   Haskell2010
-  default-extensions:  CPP
-                     , DeriveGeneric
-                     , FlexibleInstances
-                     , LambdaCase
-                     , OverloadedStrings
-                     , StandaloneDeriving
-                     , TemplateHaskell
-                     , TupleSections
-                     , TypeFamilies
-  ghc-options:        -Wall -fno-warn-missing-signatures
+  ghc-options:        -Wall
