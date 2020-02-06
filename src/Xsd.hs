@@ -62,15 +62,14 @@ getSchema source = do
       else do
         xsd <- liftIO $ fetchXsd uri
         modify' (Set.insert uri)
-        let schema = xsdToSchema xsd
-            includes = flip mapMaybe (children xsd) $ \c ->
-              case c of
-                ChildInclude i -> Just i
-                _ -> Nothing
-            imports = flip mapMaybe (children xsd) $ \c ->
-              case c of
-                ChildImport i -> Just i
-                _ -> Nothing
+        let
+          schema = xsdToSchema xsd
+          includes = flip mapMaybe (children xsd) $ \c -> case c of
+            ChildInclude i -> Just i
+            _ -> Nothing
+          imports = flip mapMaybe (children xsd) $ \c -> case c of
+            ChildImport i -> Just i
+            _ -> Nothing
         goInclude uri includes (schema:schemata)
           >>= goImports uri imports
 
@@ -119,8 +118,9 @@ xsdToSchema xsd = Schema
 
 fetchXsd :: URI -> IO Xsd
 fetchXsd uri = do
-  let path = URI.uriToString id uri ""
-      onParseErr e = fail $ path ++ ": " ++ show e
+  let
+    path = URI.uriToString id uri ""
+    onParseErr e = fail $ path ++ ": " ++ show e
   if isLocal uri
     then
       parseFile path

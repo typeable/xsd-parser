@@ -64,8 +64,9 @@ parseInclude c = do
 
 parseImport :: Cursor -> P Xsd.Import
 parseImport c = do
-  let location = anAttribute "schemaLocation" c
-      namespace = Xsd.Namespace <$> anAttribute "namespace" c
+  let
+    location = anAttribute "schemaLocation" c
+    namespace = Xsd.Namespace <$> anAttribute "namespace" c
 
   tns <- asks envTargetNamespace
   case (namespace, tns) of
@@ -147,11 +148,9 @@ parseSimpleType c = do
     ([e], [], []) -> Xsd.AtomicType
       <$> parseRestriction e
       <*> parseAnnotations c
-
     ([], [l], []) -> Xsd.ListType
       <$> parseList l
       <*> parseAnnotations c
-
     -- TODO implement me
     ([], [], [_]) -> parseError c "Not implemented: union"
     _ -> parseError c "Expected exactly of of restriction, list or union"
@@ -259,10 +258,11 @@ parseAnnotations c = do
   annotationAxis <- makeElemAxis "annotation"
   documentationAxis <- makeElemAxis "documentation"
 
-  let documentation = c
-        $/ annotationAxis
-        &// documentationAxis
-        &/ content
+  let
+    documentation = c
+      $/ annotationAxis
+      &// documentationAxis
+      &/ content
   return $ Xsd.Documentation <$> documentation
 
 -- Section: parser entry points
@@ -286,12 +286,13 @@ defaultConfig = Config
 -- Make sure the document is parsed with `psRetainNamespaces` enabled!
 parse :: Config -> Document -> Either ParseError Xsd
 parse conf doc = do
-  let env = Env
-        { envConfig = conf
-        , envTargetNamespace = Nothing
-        , envPrefixes = []
-        }
-      c = fromDocument doc
+  let
+    env = Env
+      { envConfig = conf
+      , envTargetNamespace = Nothing
+      , envPrefixes = []
+      }
+    c = fromDocument doc
   runExcept $ flip runReaderT env $ handleNamespaces c $ do
     schemaAxis <- makeElemAxis "schema"
     case c $.// schemaAxis of
@@ -349,14 +350,15 @@ pprCursor = Text.intercalate "." . go []
   where
   go ctx c = case node c of
     NodeElement e ->
-      let ctx' = name : ctx
-          elemName = nameLocalName (elementName e)
-          name = case laxAttribute "name" c of
-            (n:_) -> elemName <> "[" <> n <> "]"
-            _ -> elemName
+      let
+        ctx' = name : ctx
+        elemName = nameLocalName (elementName e)
+        name = case laxAttribute "name" c of
+          (n:_) -> elemName <> "[" <> n <> "]"
+          _ -> elemName
       in case parent c of
-          (p:_) -> go ctx' p
-          _ -> ctx'
+        (p:_) -> go ctx' p
+        _ -> ctx'
     _ -> ctx
 
 -- | Fail with the location and message
@@ -429,14 +431,11 @@ getElementName c = do
   case node c of
     NodeElement e -> do
       let name = elementName e
-
       ignore <- asks (configIgnoreSchemaNamespace . envConfig)
       unless ignore $ do
         when (nameNamespace name /= Just Xsd.schemaNamespace) $ do
           parseError c "Expected XMLSchema element"
-
       return (nameLocalName name)
-
     _ -> parseError c "Expected node element here"
 
 -- | Attaches xml schema namespace
