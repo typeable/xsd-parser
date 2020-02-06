@@ -93,6 +93,32 @@ spec = do
           Xsd.restrictionBase restriction `shouldBe`
             Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
+        context "when restriction contains enumerations" $ do
+          it "parses them" $ do
+            let
+              doc = mkDoc $
+                mkElem "schema"
+                  (Map.fromList [("xmlns:xs","something")])
+                  [NodeElement $ mkElem "simpleType"
+                    (Map.fromList [("name", "str")])
+                    [NodeElement $ mkElem "restriction"
+                      (Map.fromList [("base", "xs:string")])
+                      [ NodeElement $ mkElem "enumeration"
+                          (Map.fromList [("value", "value1")]) []
+                      , NodeElement $ mkElem "enumeration"
+                          (Map.fromList [("value", "value2")]) []
+                      ]]]
+              res = Xsd.parse Xsd.defaultConfig doc
+              Right [Xsd.ChildType tpName (Xsd.TypeSimple t)] =
+                fmap Xsd.children res
+              Xsd.AtomicType restriction _ = t
+            res `shouldSatisfy` isRight
+            tpName `shouldBe` (Xsd.QName Nothing "str")
+            Xsd.restrictionConstraints restriction `shouldBe`
+              [ Xsd.Enumeration "value1"
+              , Xsd.Enumeration "value2"
+              ]
+
         context "when restrication base is inlined" $ do
           it "parses it" $ do
             let
@@ -117,7 +143,7 @@ spec = do
             Xsd.restrictionBase restriction `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
-        context "when base is refers to an unbound prefix" $ do
+        context "when base refers to an unbound prefix" $ do
           it "fails" $ do
             let
               doc = mkDoc $
