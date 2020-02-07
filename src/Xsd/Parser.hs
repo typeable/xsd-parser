@@ -215,8 +215,7 @@ parseContent c = do
 
 parsePlainContent :: Cursor -> P Xsd.PlainContent
 parsePlainContent c = do
-  attrAxis <- makeElemAxis "attribute"
-  attributes <- mapM parseAttribute (c $/ attrAxis)
+  attributes <- parseAttributes c
   model <- parseModelGroup c
   return Xsd.PlainContent
     { Xsd.plainContentModel = model
@@ -227,7 +226,24 @@ parseSimpleContent :: Cursor -> P Xsd.SimpleContent
 parseSimpleContent c = parseError c "not implemented"
 
 parseComplexContent :: Cursor -> P Xsd.ComplexContent
-parseComplexContent c = parseError c "not implemented"
+parseComplexContent c = do
+  restrictionAxis <- makeElemAxis "restriction"
+  extenstionAxis <- makeElemAxis "extension"
+  case (c $/ restrictionAxis, c $/ extenstionAxis) of
+    ([r], []) -> parseError r "not implemented"
+    ([], [e]) -> Xsd.ComplexContentExtension <$> parseComplexExtension e
+    _ -> parseError c "Expected one of restriction or extension"
+
+parseComplexExtension :: Cursor -> P Xsd.ComplexExtension
+parseComplexExtension c = do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  model <- parseModelGroup c
+  return Xsd.ComplexExtension
+    { Xsd.complexExtensionBase = base
+    , Xsd.complexExtensionModel = model
+    , Xsd.complexExtensionAttributes = attributes
+    }
 
 parseModelGroup :: Cursor -> P (Maybe Xsd.ModelGroup)
 parseModelGroup c = do
@@ -255,6 +271,11 @@ parseElements :: Cursor -> P [Xsd.Element]
 parseElements c = do
   elementAxis <- makeElemAxis "element"
   mapM parseElement (c $/ elementAxis)
+
+parseAttributes :: Cursor -> P [Xsd.Attribute]
+parseAttributes c = do
+  attrAxis <- makeElemAxis "attribute"
+  mapM parseAttribute (c $/ attrAxis)
 
 parseAttribute :: Cursor -> P Xsd.Attribute
 parseAttribute c = do

@@ -262,6 +262,33 @@ spec = do
           map Xsd.elementName elems `shouldBe`
             map (Xsd.QName Nothing) ["firstName", "lastName"]
 
+      context "when it contains complexContent" $ do
+        context "when it's an extenstion" $ do
+          it "succeeds" $ do
+            let
+              doc = mkDoc $
+                mkElem "schema"
+                  (Map.fromList [("xmlns:xs","something")])
+                  [NodeElement $ mkElem "complexType"
+                    (Map.fromList [("name", "person")])
+                    [NodeElement $ mkElem "complexContent" Map.empty
+                      [ NodeElement $ mkElem "extension"
+                        (Map.fromList [("base", "BaseType")])
+                        [ NodeElement $ mkElem "sequence" Map.empty
+                          [ NodeElement $ mkElem "element"
+                            (Map.fromList
+                              [ ("name", "first")
+                              , ("type", "xs:string")])
+                            []
+                          ]]]]]
+              res = Xsd.parse Xsd.defaultConfig doc
+              Right [Xsd.ChildType _ (Xsd.TypeComplex t)] =
+                fmap Xsd.children res
+              Xsd.ContentComplex (Xsd.ComplexContentExtension e)
+                = Xsd.complexContent t
+            res `shouldSatisfy` isRight
+            Xsd.complexExtensionBase e `shouldBe` Xsd.QName Nothing "BaseType"
+
     context "when element is given" $ do
       context "when type is inlined" $ do
         it "succeeds" $ do
