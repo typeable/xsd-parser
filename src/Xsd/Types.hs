@@ -7,6 +7,7 @@ module Xsd.Types
 , Type(..)
 , SimpleType(..)
 , Restriction(..)
+, Constraint(..)
 , ComplexType(..)
 , RefOr(..)
 , Element(..)

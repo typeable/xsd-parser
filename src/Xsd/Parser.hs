@@ -168,10 +168,18 @@ parseRestriction c = do
         _ -> parseError c "Multiple types"
     Just t -> Xsd.Ref <$> makeQName c t
 
+  constraints <- parseConstrains c
+
   return Xsd.Restriction
     { Xsd.restrictionBase = tp
-    , Xsd.restrictionConstraints = [] -- TODO: implement me
+    , Xsd.restrictionConstraints = constraints
     }
+
+parseConstrains :: Cursor -> P [Xsd.Constraint]
+parseConstrains c = do
+  enumerationAxis <- makeElemAxis "enumeration"
+  forM (c $/ enumerationAxis) $ \e -> do
+    Xsd.Enumeration <$> theAttribute "value" e
 
 parseList :: Cursor -> P (Xsd.RefOr Xsd.SimpleType)
 parseList c =
