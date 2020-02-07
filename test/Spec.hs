@@ -198,7 +198,8 @@ spec = do
               res = Xsd.parse Xsd.defaultConfig doc
               Right [Xsd.ChildType tpName (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
-              [attr] = Xsd.complexAttributes t
+              Xsd.ContentPlain plain = Xsd.complexContent t
+              [attr] = Xsd.plainContentAttributes plain
             res `shouldSatisfy` isRight
             tpName `shouldBe` Xsd.QName Nothing "person"
             Xsd.attrName attr `shouldBe` Xsd.QName Nothing "firstName"
@@ -223,7 +224,8 @@ spec = do
               res = Xsd.parse Xsd.defaultConfig doc
               Right [Xsd.ChildType _ (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
-              [attr] = Xsd.complexAttributes t
+              Xsd.ContentPlain plain = Xsd.complexContent t
+              [attr] = Xsd.plainContentAttributes plain
               Xsd.Inline (Xsd.AtomicType restriction _) = Xsd.attrType attr
             res `shouldSatisfy` isRight
             Xsd.restrictionBase restriction `shouldBe`
@@ -254,7 +256,8 @@ spec = do
             res = Xsd.parse Xsd.defaultConfig doc
             Right [Xsd.ChildType _ (Xsd.TypeComplex t)] =
               fmap Xsd.children res
-            Just (Xsd.Sequence elems) = Xsd.complexModelGroup t
+            Xsd.ContentPlain plain = Xsd.complexContent t
+            Just (Xsd.Sequence elems) = Xsd.plainContentModel plain
           res `shouldSatisfy` isRight
           map Xsd.elementName elems `shouldBe`
             map (Xsd.QName Nothing) ["firstName", "lastName"]

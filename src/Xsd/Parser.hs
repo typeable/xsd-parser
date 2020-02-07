@@ -195,27 +195,51 @@ parseList c =
 
 parseComplexType :: Cursor -> P Xsd.ComplexType
 parseComplexType c = do
+  annotations <- parseAnnotations c
+  cont <- parseContent c
+  return Xsd.ComplexType
+    { Xsd.complexAnnotations = annotations
+    , Xsd.complexContent = cont
+    }
+
+parseContent :: Cursor -> P Xsd.Content
+parseContent c = do
+  simpleContentAxis <- makeElemAxis "simpleContent"
+  complexContentAxis <- makeElemAxis "complexContent"
+  case (c $/ simpleContentAxis, c $/ complexContentAxis) of
+    ([], []) -> Xsd.ContentPlain <$> parsePlainContent c
+    ([s], []) -> Xsd.ContentSimple <$> parseSimpleContent s
+    ([], [s]) -> Xsd.ContentComplex <$> parseComplexContent s
+    _ -> parseError c
+      "Expected one of simpleContent, complextContent or model group"
+
+parsePlainContent :: Cursor -> P Xsd.PlainContent
+parsePlainContent c = do
   attrAxis <- makeElemAxis "attribute"
   attributes <- mapM parseAttribute (c $/ attrAxis)
-
-  group <- do
-    sequenceAxis <- makeElemAxis "sequence"
-    choiceAxis <- makeElemAxis "choice"
-    allAxis <- makeElemAxis "all"
-    case (c $/ sequenceAxis, c $/ choiceAxis, c $/ allAxis) of
-      ([], [], []) -> return Nothing
-      ([g], [], []) -> Just <$> parseSequence g
-      ([], [g], []) -> Just <$> parseChoice g
-      ([], [], [g]) -> Just <$> parseAll g
-      _ -> parseError c "Multiple groups"
-
-  annotations <- parseAnnotations c
-
-  return Xsd.ComplexType
-    { Xsd.complexAttributes = attributes
-    , Xsd.complexModelGroup = group
-    , Xsd.complexAnnotations = annotations
+  model <- parseModelGroup c
+  return Xsd.PlainContent
+    { Xsd.plainContentModel = model
+    , Xsd.plainContentAttributes = attributes
     }
+
+parseSimpleContent :: Cursor -> P Xsd.SimpleContent
+parseSimpleContent c = parseError c "not implemented"
+
+parseComplexContent :: Cursor -> P Xsd.ComplexContent
+parseComplexContent c = parseError c "not implemented"
+
+parseModelGroup :: Cursor -> P (Maybe Xsd.ModelGroup)
+parseModelGroup c = do
+  sequenceAxis <- makeElemAxis "sequence"
+  choiceAxis <- makeElemAxis "choice"
+  allAxis <- makeElemAxis "all"
+  case (c $/ sequenceAxis, c $/ choiceAxis, c $/ allAxis) of
+    ([], [], []) -> return Nothing
+    ([g], [], []) -> Just <$> parseSequence g
+    ([], [g], []) -> Just <$> parseChoice g
+    ([], [], [g]) -> Just <$> parseAll g
+    _ -> parseError c "Multiple model groups"
 
 parseSequence :: Cursor -> P Xsd.ModelGroup
 parseSequence c = Xsd.Sequence <$> parseElements c
