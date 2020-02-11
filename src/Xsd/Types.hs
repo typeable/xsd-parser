@@ -9,6 +9,11 @@ module Xsd.Types
 , Restriction(..)
 , Constraint(..)
 , ComplexType(..)
+, Content(..)
+, PlainContent(..)
+, SimpleContent(..)
+, ComplexContent(..)
+, ComplexExtension(..)
 , RefOr(..)
 , Element(..)
 , MaxOccurs(..)
@@ -88,10 +93,38 @@ data SimpleType
   deriving (Show, Eq)
 
 data ComplexType = ComplexType
-  { complexAttributes :: [Attribute]
-  , complexModelGroup :: Maybe ModelGroup
-  , complexAnnotations :: [Annotation]
+  { complexAnnotations :: [Annotation]
+  , complexContent :: Content
   }
+  deriving (Show, Eq)
+
+data Content
+  = ContentComplex ComplexContent
+  | ContentSimple SimpleContent
+  | ContentPlain PlainContent
+  deriving (Show, Eq)
+
+-- | Represent content of complexType without simpleContent or complexContent
+data PlainContent = PlainContent
+  { plainContentModel :: Maybe ModelGroup
+  , plainContentAttributes :: [Attribute]
+  }
+  deriving (Show, Eq)
+
+data ComplexContent
+  = ComplexContentExtension ComplexExtension
+  | ComplexContentRestriction -- TODO: implement me
+  deriving (Show, Eq)
+
+data ComplexExtension = ComplexExtension
+  { complexExtensionBase :: QName
+  , complexExtensionModel :: Maybe ModelGroup
+  , complexExtensionAttributes :: [Attribute]
+  }
+  deriving (Show, Eq)
+
+-- TODO: implement me
+data SimpleContent = SimpleContent
   deriving (Show, Eq)
 
 data ModelGroup
@@ -115,6 +148,7 @@ data Use
 
 data Restriction = Restriction
   { restrictionBase :: RefOr SimpleType
+  -- XXX: could restrictionBase be an inline type? Probably not.
   , restrictionConstraints :: [Constraint]
   }
   deriving (Show, Eq)

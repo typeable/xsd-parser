@@ -195,27 +195,67 @@ parseList c =
 
 parseComplexType :: Cursor -> P Xsd.ComplexType
 parseComplexType c = do
-  attrAxis <- makeElemAxis "attribute"
-  attributes <- mapM parseAttribute (c $/ attrAxis)
-
-  group <- do
-    sequenceAxis <- makeElemAxis "sequence"
-    choiceAxis <- makeElemAxis "choice"
-    allAxis <- makeElemAxis "all"
-    case (c $/ sequenceAxis, c $/ choiceAxis, c $/ allAxis) of
-      ([], [], []) -> return Nothing
-      ([g], [], []) -> Just <$> parseSequence g
-      ([], [g], []) -> Just <$> parseChoice g
-      ([], [], [g]) -> Just <$> parseAll g
-      _ -> parseError c "Multiple groups"
-
   annotations <- parseAnnotations c
-
+  cont <- parseContent c
   return Xsd.ComplexType
-    { Xsd.complexAttributes = attributes
-    , Xsd.complexModelGroup = group
-    , Xsd.complexAnnotations = annotations
+    { Xsd.complexAnnotations = annotations
+    , Xsd.complexContent = cont
     }
+
+parseContent :: Cursor -> P Xsd.Content
+parseContent c = do
+  simpleContentAxis <- makeElemAxis "simpleContent"
+  complexContentAxis <- makeElemAxis "complexContent"
+  case (c $/ simpleContentAxis, c $/ complexContentAxis) of
+    ([], []) -> Xsd.ContentPlain <$> parsePlainContent c
+    ([s], []) -> Xsd.ContentSimple <$> parseSimpleContent s
+    ([], [s]) -> Xsd.ContentComplex <$> parseComplexContent s
+    _ -> parseError c
+      "Expected one of simpleContent, complextContent or model group"
+
+parsePlainContent :: Cursor -> P Xsd.PlainContent
+parsePlainContent c = do
+  attributes <- parseAttributes c
+  model <- parseModelGroup c
+  return Xsd.PlainContent
+    { Xsd.plainContentModel = model
+    , Xsd.plainContentAttributes = attributes
+    }
+
+parseSimpleContent :: Cursor -> P Xsd.SimpleContent
+parseSimpleContent c = parseError c "not implemented"
+
+parseComplexContent :: Cursor -> P Xsd.ComplexContent
+parseComplexContent c = do
+  restrictionAxis <- makeElemAxis "restriction"
+  extenstionAxis <- makeElemAxis "extension"
+  case (c $/ restrictionAxis, c $/ extenstionAxis) of
+    ([r], []) -> parseError r "not implemented"
+    ([], [e]) -> Xsd.ComplexContentExtension <$> parseComplexExtension e
+    _ -> parseError c "Expected one of restriction or extension"
+
+parseComplexExtension :: Cursor -> P Xsd.ComplexExtension
+parseComplexExtension c = do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  model <- parseModelGroup c
+  return Xsd.ComplexExtension
+    { Xsd.complexExtensionBase = base
+    , Xsd.complexExtensionModel = model
+    , Xsd.complexExtensionAttributes = attributes
+    }
+
+parseModelGroup :: Cursor -> P (Maybe Xsd.ModelGroup)
+parseModelGroup c = do
+  sequenceAxis <- makeElemAxis "sequence"
+  choiceAxis <- makeElemAxis "choice"
+  allAxis <- makeElemAxis "all"
+  case (c $/ sequenceAxis, c $/ choiceAxis, c $/ allAxis) of
+    ([], [], []) -> return Nothing
+    ([g], [], []) -> Just <$> parseSequence g
+    ([], [g], []) -> Just <$> parseChoice g
+    ([], [], [g]) -> Just <$> parseAll g
+    _ -> parseError c "Multiple model groups"
 
 parseSequence :: Cursor -> P Xsd.ModelGroup
 parseSequence c = Xsd.Sequence <$> parseElements c
@@ -231,6 +271,11 @@ parseElements :: Cursor -> P [Xsd.Element]
 parseElements c = do
   elementAxis <- makeElemAxis "element"
   mapM parseElement (c $/ elementAxis)
+
+parseAttributes :: Cursor -> P [Xsd.Attribute]
+parseAttributes c = do
+  attrAxis <- makeElemAxis "attribute"
+  mapM parseAttribute (c $/ attrAxis)
 
 parseAttribute :: Cursor -> P Xsd.Attribute
 parseAttribute c = do
