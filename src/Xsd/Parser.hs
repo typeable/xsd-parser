@@ -235,7 +235,7 @@ parseComplexContent c = do
     _ -> parseError c "Expected one of restriction or extension"
 
 parseComplexExtension :: Cursor -> P Xsd.ComplexExtension
-parseComplexExtension c = do
+parseComplexExtension c = handleNamespaces c $ do
   base <- theAttribute "base" c >>= makeQName c
   attributes <- parseAttributes c
   model <- parseModelGroup c
@@ -452,8 +452,9 @@ makeElemAxis name = do
 makeQName :: Cursor -> Text -> P Xsd.QName
 makeQName c t = case Text.splitOn ":" t of
   [n] -> do
+    ns <- asks (lookup Nothing . envPrefixes)
     return Xsd.QName
-      { Xsd.qnNamespace = Nothing
+      { Xsd.qnNamespace = ns
       , Xsd.qnName = n
       }
   [p, n] -> do
