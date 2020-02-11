@@ -61,6 +61,7 @@ data Element = Element
   { elementName :: QName
   , elementType :: RefOr Type
   , elementOccurs :: (Int, MaxOccurs)
+  , elementNillable :: Bool
   , elementAnnotations :: [Annotation]
   }
   deriving (Show, Eq)

@@ -107,11 +107,18 @@ parseElement c = handleNamespaces c $ do
 
   qname <- makeTargetQName name
 
+  nillable <- case anAttribute "nillable" c of
+    Nothing -> return False
+    Just "true" -> return True
+    Just "false" -> return False
+    _ -> parseError c "Unexpected value of nillable attribute"
+
   return Xsd.Element
     { Xsd.elementName = qname
     , Xsd.elementType = tp
     , Xsd.elementAnnotations = annotations
     , Xsd.elementOccurs = (minOccurs, maxOccurs)
+    , Xsd.elementNillable = nillable
     }
 
 -- | Parse inline type, simple or complex
