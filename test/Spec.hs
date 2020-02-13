@@ -6,6 +6,7 @@ module Spec
 where
 
 import Data.Text (Text)
+import Data.Maybe
 import Data.Either
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -259,8 +260,8 @@ spec = do
             Xsd.ContentPlain plain = Xsd.complexContent t
             Just (Xsd.Sequence elems) = Xsd.plainContentModel plain
           res `shouldSatisfy` isRight
-          map Xsd.elementName elems `shouldBe`
-            map (Xsd.QName Nothing) ["firstName", "lastName"]
+          mapMaybe (Xsd.refOr (const Nothing) (Just . Xsd.elementName)) elems
+            `shouldBe` map (Xsd.QName Nothing) ["firstName", "lastName"]
 
       context "when it contains complexContent" $ do
         context "when it's an extenstion" $ do
@@ -305,7 +306,7 @@ spec = do
                   ]
                 ]
             res = Xsd.parse Xsd.defaultConfig doc
-            Right [Xsd.ChildElement e] = fmap Xsd.children res
+            Right [Xsd.ChildElement (Xsd.Inline e)] = fmap Xsd.children res
           res `shouldSatisfy` isRight
           Xsd.elementName e `shouldBe`
             Xsd.QName Nothing "person"

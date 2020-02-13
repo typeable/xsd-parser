@@ -48,7 +48,7 @@ parseChild :: Cursor -> P (Maybe Xsd.Child)
 parseChild c = do
   name <- getElementName c
   case name of
-    "element" -> Just . Xsd.ChildElement <$> parseElement c
+    "element" -> Just . Xsd.ChildElement <$> parseElementOrRef c
     "simpleType" -> Just <$> parseTopSimpleType c
     "complexType" -> Just <$> parseTopComplexType c
     "include" -> Just . Xsd.ChildInclude <$> parseInclude c
@@ -80,6 +80,12 @@ parseImport c = do
     { Xsd.importLocation = location
     , Xsd.importNamespace = namespace
     }
+
+parseElementOrRef :: Cursor -> P (Xsd.RefOr Xsd.Element)
+parseElementOrRef c = do
+  case anAttribute "ref" c of
+    Nothing -> Xsd.Inline <$> parseElement c
+    Just ref -> Xsd.Ref <$> makeQName c ref
 
 parseElement :: Cursor -> P Xsd.Element
 parseElement c = handleNamespaces c $ do
@@ -275,10 +281,10 @@ parseAll :: Cursor -> P Xsd.ModelGroup
 parseAll c = Xsd.All <$> parseElements c
 
 -- | Get all child elements
-parseElements :: Cursor -> P [Xsd.Element]
+parseElements :: Cursor -> P [Xsd.RefOr Xsd.Element]
 parseElements c = do
   elementAxis <- makeElemAxis "element"
-  mapM parseElement (c $/ elementAxis)
+  mapM parseElementOrRef (c $/ elementAxis)
 
 parseAttributes :: Cursor -> P [Xsd.Attribute]
 parseAttributes c = do

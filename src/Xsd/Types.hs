@@ -15,6 +15,7 @@ module Xsd.Types
 , ComplexContent(..)
 , ComplexExtension(..)
 , RefOr(..)
+, refOr
 , Element(..)
 , MaxOccurs(..)
 , Attribute(..)
@@ -48,7 +49,7 @@ newtype Namespace = Namespace
   deriving (Show, Eq, Ord)
 
 data Child
-  = ChildElement Element
+  = ChildElement (RefOr Element)
   | ChildType QName Type
   | ChildImport Import
   | ChildInclude Include
@@ -129,9 +130,9 @@ data SimpleContent = SimpleContent
   deriving (Show, Eq)
 
 data ModelGroup
-  = Sequence [Element]
-  | Choice [Element]
-  | All [Element]
+  = Sequence [RefOr Element]
+  | Choice [RefOr Element]
+  | All [RefOr Element]
   deriving (Show, Eq)
 
 data Attribute = Attribute
@@ -159,6 +160,11 @@ data RefOr t
   = Ref QName
   | Inline t
   deriving (Show, Eq)
+
+refOr :: (QName -> a) -> (t -> a) -> RefOr t -> a
+refOr f g ref = case ref of
+  Ref name -> f name
+  Inline t -> g t
 
 data Constraint
   = Enumeration Text
