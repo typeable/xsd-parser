@@ -62,3 +62,15 @@ test-suite spec
                     , xsd-parser
   default-language:   Haskell2010
   ghc-options:        -Wall
+
+test-suite xsts
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     xsts-test
+  main-is:            Main.hs
+  build-depends:      base
+                    , text
+                    , filepath
+                    , xml-conduit
+                    , xsd-parser
+  default-language:   Haskell2010
+  ghc-options:        -Wall
