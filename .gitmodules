@@ -1,0 +1,3 @@
+[submodule "xsdtests"]
+	path = xsdtests
+	url = git@github.com:w3c/xsdtests.git
