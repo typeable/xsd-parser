@@ -38,7 +38,13 @@ statsRef = unsafePerformIO (newIORef [])
 
 dumpResults :: [Stat] -> IO ()
 dumpResults stats = IO.withFile "xsts.md" IO.WriteMode $ \h -> do
+  IO.hPutStrLn h "This table is generated automatically by `xsts` test."
+  IO.hPutStrLn h "It contains number of xsd files successfully parsed."
+  IO.hPutStrLn h "Note that we don't currently attempt to validate xml files"
+  IO.hPutStrLn h "against the schemata."
+  IO.hPutStrLn h ""
   IO.hPutStrLn h "Test set | Total tests | Passed tests"
+  IO.hPutStrLn h "--- | --- | ---"
   forM_ stats $ \s -> do
     IO.hPutStrLn h $ mconcat
       [ Text.unpack (statTestSet s), " | "

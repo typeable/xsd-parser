@@ -1,4 +1,10 @@
+This table is generated automatically by `xsts` test.
+It contains number of xsd files successfully parsed.
+Note that we don't currently attempt to validate xml files
+against the schemata.
+
 Test set | Total tests | Passed tests
+--- | --- | ---
 yearMonthDuration | 25 | 13
 XSImportReference | 1 | 1
 XPathDefaultNSonKeyKeyRefUnique | 13 | 2
