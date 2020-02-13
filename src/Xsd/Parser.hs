@@ -85,10 +85,9 @@ parseElement :: Cursor -> P Xsd.Element
 parseElement c = handleNamespaces c $ do
   name <- theAttribute "name" c
 
-  -- XXX: generalaze RefOr parsing
   tp <- case anAttribute "type" c of
     Just t -> Xsd.Ref <$> makeQName c t
-    _ -> Xsd.Inline <$> parseType c
+    _ -> maybe (Xsd.Ref anyType) Xsd.Inline <$> parseType c
 
   minOccurs <- case anAttribute "minOccurs" c of
     Nothing -> return 1
@@ -120,16 +119,18 @@ parseElement c = handleNamespaces c $ do
     , Xsd.elementOccurs = (minOccurs, maxOccurs)
     , Xsd.elementNillable = nillable
     }
+  where
+  anyType = Xsd.QName (Just (Xsd.Namespace Xsd.schemaNamespace)) "anyType"
 
 -- | Parse inline type, simple or complex
-parseType :: Cursor -> P Xsd.Type
+parseType :: Cursor -> P (Maybe Xsd.Type)
 parseType c = do
   simpleTypeAxis <- makeElemAxis "simpleType"
   complexTypeAxis <- makeElemAxis "complexType"
   case (c $/ simpleTypeAxis, c $/ complexTypeAxis) of
-    ([], []) -> parseError c "No type"
-    ([t], []) -> Xsd.TypeSimple <$> parseSimpleType t
-    ([], [t]) -> Xsd.TypeComplex <$> parseComplexType t
+    ([], []) -> return Nothing
+    ([t], []) -> Just . Xsd.TypeSimple <$> parseSimpleType t
+    ([], [t]) -> Just . Xsd.TypeComplex <$> parseComplexType t
     _ -> parseError c "Multiple types"
 
 -- | Top level simple type
