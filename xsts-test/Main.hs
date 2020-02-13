@@ -9,6 +9,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.IORef
 import Control.Monad
+import Control.Exception
 import System.FilePath
 import System.IO.Unsafe (unsafePerformIO)
 import qualified System.IO as IO
@@ -52,6 +53,9 @@ dumpResults stats = IO.withFile "xsts.md" IO.WriteMode $ \h -> do
       , show (statSucceeded s)
       ]
 
+expectedFailures :: Int
+expectedFailures = 5316
+
 main :: IO ()
 main = do
   let path = "./xsdtests/suite.xml"
@@ -62,8 +66,9 @@ main = do
   putStrLn $ "Succeeded: " ++ show oks
   errs <- readIORef errRef
   putStrLn $ "Failed: " ++ show errs
-  unless (errs == 11468) $
-    fail $ "There were " ++ show errs ++ " errors"
+  unless (errs == expectedFailures) $
+    fail $ "There were " ++ show errs ++ " errors, expected "
+      ++ show expectedFailures
 
 runSuite :: FilePath -> Cursor -> IO ()
 runSuite path c = mapM_ (runTestSetRef dir) (c $/ laxElement "testSetRef")
@@ -117,8 +122,8 @@ runSchemaTest dir groupName c = do
   case mvalid of
     Nothing -> return Nothing -- indetermined
     Just valid -> do
-      doc <- Text.XML.readFile def (dir </> Text.unpack path)
-      case (Xsd.parse Xsd.defaultConfig doc, valid) of
+      res <- try (Xsd.getSchema (dir </> Text.unpack path))
+      case (res, valid) of
         (Left _, False) -> do
           modifyIORef' okRef succ
           return (Just True)
@@ -134,7 +139,7 @@ runSchemaTest dir groupName c = do
           modifyIORef' errRef succ
           putStrLn $ "valid xsd didn't pass: " <> Text.unpack groupName
             <> " (" <> dir </> Text.unpack path <> ")"
-            <> ": " <> show err
+            <> ": " <> show (err :: SomeException)
           return (Just False)
 
 anAttribute :: Cursor -> Text -> Maybe Text
