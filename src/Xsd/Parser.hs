@@ -165,8 +165,9 @@ parseSimpleType c = do
     ([], [l], []) -> Xsd.ListType
       <$> parseList l
       <*> parseAnnotations c
-    -- TODO implement me
-    ([], [], [_]) -> parseError c "Not implemented: union"
+    ([], [], [u]) -> Xsd.UnionType
+      <$> parseUnion u
+      <*> parseAnnotations c
     _ -> parseError c "Expected exactly of of restriction, list or union"
 
 -- | Restriction for simple type
@@ -206,6 +207,15 @@ parseList c =
         [s] -> Xsd.Inline <$> parseSimpleType s
         _ -> parseError c "Multiple types"
     Just t -> Xsd.Ref <$> makeQName c t
+
+parseUnion :: Cursor -> P [Xsd.RefOr Xsd.SimpleType]
+parseUnion c =
+  case anAttribute "memberTypes" c of
+    Just list ->
+      mapM (fmap Xsd.Ref . makeQName c) (Text.splitOn " " list)
+    Nothing -> do
+      simpleTypeAxis <- makeElemAxis "simpleType"
+      mapM (fmap Xsd.Inline . parseSimpleType) (c $/ simpleTypeAxis)
 
 parseComplexType :: Cursor -> P Xsd.ComplexType
 parseComplexType c = do

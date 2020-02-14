@@ -93,7 +93,7 @@ data Include = Include
 data SimpleType
   = AtomicType SimpleRestriction [Annotation]
   | ListType (RefOr SimpleType) [Annotation]
-  -- TODO: also union
+  | UnionType [RefOr SimpleType] [Annotation]
   deriving (Show, Eq)
 
 data ComplexType = ComplexType
