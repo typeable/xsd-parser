@@ -14,6 +14,7 @@ module Xsd.Types
 , SimpleContent(..)
 , ComplexContent(..)
 , ComplexExtension(..)
+, ComplexRestriction(..)
 , RefOr(..)
 , refOr
 , Element(..)
@@ -115,13 +116,20 @@ data PlainContent = PlainContent
 
 data ComplexContent
   = ComplexContentExtension ComplexExtension
-  | ComplexContentRestriction -- TODO: implement me
+  | ComplexContentRestriction ComplexRestriction
   deriving (Show, Eq)
 
 data ComplexExtension = ComplexExtension
   { complexExtensionBase :: QName
   , complexExtensionModel :: Maybe ModelGroup
   , complexExtensionAttributes :: [Attribute]
+  }
+  deriving (Show, Eq)
+
+data ComplexRestriction = ComplexRestriction
+  { complexRestrictionBase :: QName
+  , complexRestrictionModel :: Maybe ModelGroup
+  , complexRestrictionAttributes :: [Attribute]
   }
   deriving (Show, Eq)
 

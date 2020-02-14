@@ -244,7 +244,7 @@ parseComplexContent c = do
   restrictionAxis <- makeElemAxis "restriction"
   extenstionAxis <- makeElemAxis "extension"
   case (c $/ restrictionAxis, c $/ extenstionAxis) of
-    ([r], []) -> parseError r "not implemented"
+    ([r], []) -> Xsd.ComplexContentRestriction <$> parseComplexRestriction r
     ([], [e]) -> Xsd.ComplexContentExtension <$> parseComplexExtension e
     _ -> parseError c "Expected one of restriction or extension"
 
@@ -257,6 +257,17 @@ parseComplexExtension c = handleNamespaces c $ do
     { Xsd.complexExtensionBase = base
     , Xsd.complexExtensionModel = model
     , Xsd.complexExtensionAttributes = attributes
+    }
+
+parseComplexRestriction :: Cursor -> P Xsd.ComplexRestriction
+parseComplexRestriction c = handleNamespaces c $ do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  model <- parseModelGroup c
+  return Xsd.ComplexRestriction
+    { Xsd.complexRestrictionBase = base
+    , Xsd.complexRestrictionModel = model
+    , Xsd.complexRestrictionAttributes = attributes
     }
 
 parseModelGroup :: Cursor -> P (Maybe Xsd.ModelGroup)
