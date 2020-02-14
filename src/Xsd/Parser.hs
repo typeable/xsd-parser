@@ -160,7 +160,7 @@ parseSimpleType c = do
   unionAxis <- makeElemAxis "union"
   case (c $/ restrictionAxis, c $/ listAxis, c $/ unionAxis) of
     ([e], [], []) -> Xsd.AtomicType
-      <$> parseRestriction e
+      <$> parseSimpleRestriction e
       <*> parseAnnotations c
     ([], [l], []) -> Xsd.ListType
       <$> parseList l
@@ -170,8 +170,8 @@ parseSimpleType c = do
     _ -> parseError c "Expected exactly of of restriction, list or union"
 
 -- | Restriction for simple type
-parseRestriction :: Cursor -> P Xsd.Restriction
-parseRestriction c = do
+parseSimpleRestriction :: Cursor -> P Xsd.SimpleRestriction
+parseSimpleRestriction c = do
   -- XXX: generalaze RefOr parsing
   tp <- case anAttribute "base" c of
     Nothing -> do
@@ -184,9 +184,9 @@ parseRestriction c = do
 
   constraints <- parseConstrains c
 
-  return Xsd.Restriction
-    { Xsd.restrictionBase = tp
-    , Xsd.restrictionConstraints = constraints
+  return Xsd.SimpleRestriction
+    { Xsd.simpleRestrictionBase = tp
+    , Xsd.simpleRestrictionConstraints = constraints
     }
 
 parseConstrains :: Cursor -> P [Xsd.Constraint]
@@ -237,7 +237,22 @@ parsePlainContent c = do
     }
 
 parseSimpleContent :: Cursor -> P Xsd.SimpleContent
-parseSimpleContent c = parseError c "not implemented"
+parseSimpleContent c = do
+  restrictionAxis <- makeElemAxis "restriction"
+  extenstionAxis <- makeElemAxis "extension"
+  case (c $/ restrictionAxis, c $/ extenstionAxis) of
+    ([r], []) -> Xsd.SimpleContentRestriction <$> parseSimpleRestriction r
+    ([], [e]) -> Xsd.SimpleContentExtension <$> parseSimpleExtension e
+    _ -> parseError c "Expected one of restriction or extension"
+
+parseSimpleExtension :: Cursor -> P Xsd.SimpleExtension
+parseSimpleExtension c = handleNamespaces c $ do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  return Xsd.SimpleExtension
+    { Xsd.simpleExtensionBase = base
+    , Xsd.simpleExtensionAttributes = attributes
+    }
 
 parseComplexContent :: Cursor -> P Xsd.ComplexContent
 parseComplexContent c = do

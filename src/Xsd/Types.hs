@@ -6,12 +6,13 @@ module Xsd.Types
 , Child(..)
 , Type(..)
 , SimpleType(..)
-, Restriction(..)
 , Constraint(..)
 , ComplexType(..)
 , Content(..)
 , PlainContent(..)
 , SimpleContent(..)
+, SimpleExtension(..)
+, SimpleRestriction(..)
 , ComplexContent(..)
 , ComplexExtension(..)
 , ComplexRestriction(..)
@@ -90,7 +91,7 @@ data Include = Include
   deriving (Show, Eq)
 
 data SimpleType
-  = AtomicType Restriction [Annotation]
+  = AtomicType SimpleRestriction [Annotation]
   | ListType (RefOr SimpleType) [Annotation]
   -- TODO: also union
   deriving (Show, Eq)
@@ -133,8 +134,9 @@ data ComplexRestriction = ComplexRestriction
   }
   deriving (Show, Eq)
 
--- TODO: implement me
-data SimpleContent = SimpleContent
+data SimpleContent
+  = SimpleContentExtension SimpleExtension
+  | SimpleContentRestriction SimpleRestriction
   deriving (Show, Eq)
 
 data ModelGroup
@@ -156,10 +158,16 @@ data Use
   | Required
   deriving (Show, Eq)
 
-data Restriction = Restriction
-  { restrictionBase :: RefOr SimpleType
-  -- XXX: could restrictionBase be an inline type? Probably not.
-  , restrictionConstraints :: [Constraint]
+data SimpleRestriction = SimpleRestriction
+  { simpleRestrictionBase :: RefOr SimpleType
+  -- XXX: could simpleRestrictionBase be an inline type? Probably not.
+  , simpleRestrictionConstraints :: [Constraint]
+  }
+  deriving (Show, Eq)
+
+data SimpleExtension = SimpleExtension
+  { simpleExtensionBase :: QName
+  , simpleExtensionAttributes :: [Attribute]
   }
   deriving (Show, Eq)
 
