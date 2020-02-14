@@ -113,7 +113,7 @@ xsdToSchema xsd = Schema
   go res [] = res
   go (ts, es) (c:cs) = case c of
     ChildType n t -> go ((n, t):ts, es) cs
-    ChildElement e -> go (ts, (elementName e, e):es) cs
+    ChildElement (Inline e) -> go (ts, (elementName e, e):es) cs
     _ -> go (ts, es) cs
 
 fetchXsd :: URI -> IO Xsd
