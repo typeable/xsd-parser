@@ -329,24 +329,30 @@ parseAttributes c = do
 
 parseAttribute :: Cursor -> P Xsd.Attribute
 parseAttribute c = do
-  name <- theAttribute "name" c >>= makeTargetQName
   use <- parseUseAttribute c
-
-  -- XXX: generalaze RefOr parsing
-  tp <- case anAttribute "type" c of
-    Nothing -> do
-      simpleTypeAxis <- makeElemAxis "simpleType"
-      case c $/ simpleTypeAxis of
-        [s] -> Xsd.Inline <$> parseSimpleType s
-        [] -> return (Xsd.Ref anySimpleType)
-        _ -> parseError c "Multiple simple types"
-    Just t -> Xsd.Ref <$> makeQName c t
-
-  return Xsd.Attribute
-    { Xsd.attrName = name
-    , Xsd.attrUse = use
-    , Xsd.attrType = tp
-    }
+  case (anAttribute "name" c, anAttribute "ref" c) of
+    (Just n, Nothing) -> do
+      name <- makeTargetQName n
+      tp <- case anAttribute "type" c of
+        Nothing -> do
+          simpleTypeAxis <- makeElemAxis "simpleType"
+          case c $/ simpleTypeAxis of
+            [s] -> Xsd.Inline <$> parseSimpleType s
+            [] -> return (Xsd.Ref anySimpleType)
+            _ -> parseError c "Multiple simple types"
+        Just t -> Xsd.Ref <$> makeQName c t
+      return $ Xsd.InlineAttribute $ Xsd.AttributeInline
+        { Xsd.attributeInlineName = name
+        , Xsd.attributeInlineUse = use
+        , Xsd.attributeInlineType = tp
+        }
+    (Nothing, Just r) -> do
+      ref <- makeQName c r
+      return $ Xsd.RefAttribute $ Xsd.AttributeRef
+        { Xsd.attributeRefRef = ref
+        , Xsd.attributeRefUse = use
+        }
+    _ -> parseError c "Should be either name or ref"
   where
   anySimpleType =
     Xsd.QName (Just (Xsd.Namespace Xsd.schemaNamespace)) "anySimpleType"

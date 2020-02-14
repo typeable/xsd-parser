@@ -21,6 +21,8 @@ module Xsd.Types
 , Element(..)
 , MaxOccurs(..)
 , Attribute(..)
+, AttributeRef(..)
+, AttributeInline(..)
 , Annotation(..)
 , Use(..)
 , ModelGroup(..)
@@ -145,10 +147,21 @@ data ModelGroup
   | All [RefOr Element]
   deriving (Show, Eq)
 
-data Attribute = Attribute
-  { attrName :: QName
-  , attrType :: RefOr SimpleType
-  , attrUse :: Use
+data Attribute
+  = RefAttribute AttributeRef
+  | InlineAttribute AttributeInline
+  deriving (Show, Eq)
+
+data AttributeInline = AttributeInline
+  { attributeInlineName :: QName
+  , attributeInlineType :: RefOr SimpleType
+  , attributeInlineUse :: Use
+  }
+  deriving (Show, Eq)
+
+data AttributeRef = AttributeRef
+  { attributeRefRef :: QName
+  , attributeRefUse :: Use
   }
   deriving (Show, Eq)
 

@@ -200,11 +200,11 @@ spec = do
               Right [Xsd.ChildType tpName (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
               Xsd.ContentPlain plain = Xsd.complexContent t
-              [attr] = Xsd.plainContentAttributes plain
+              [Xsd.InlineAttribute attr] = Xsd.plainContentAttributes plain
             res `shouldSatisfy` isRight
             tpName `shouldBe` Xsd.QName Nothing "person"
-            Xsd.attrName attr `shouldBe` Xsd.QName Nothing "firstName"
-            Xsd.attrType attr `shouldBe`
+            Xsd.attributeInlineName attr `shouldBe` Xsd.QName Nothing "firstName"
+            Xsd.attributeInlineType attr `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
         context "when attribute type is inlined" $ do
@@ -226,8 +226,9 @@ spec = do
               Right [Xsd.ChildType _ (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
               Xsd.ContentPlain plain = Xsd.complexContent t
-              [attr] = Xsd.plainContentAttributes plain
-              Xsd.Inline (Xsd.AtomicType restriction _) = Xsd.attrType attr
+              [Xsd.InlineAttribute attr] = Xsd.plainContentAttributes plain
+              Xsd.Inline (Xsd.AtomicType restriction _) =
+                Xsd.attributeInlineType attr
             res `shouldSatisfy` isRight
             Xsd.simpleRestrictionBase restriction `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
