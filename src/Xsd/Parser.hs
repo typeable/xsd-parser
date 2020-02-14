@@ -338,7 +338,7 @@ parseAttribute c = do
       simpleTypeAxis <- makeElemAxis "simpleType"
       case c $/ simpleTypeAxis of
         [s] -> Xsd.Inline <$> parseSimpleType s
-        [] -> parseError c "Attribute should have type"
+        [] -> return (Xsd.Ref anySimpleType)
         _ -> parseError c "Multiple simple types"
     Just t -> Xsd.Ref <$> makeQName c t
 
@@ -347,6 +347,9 @@ parseAttribute c = do
     , Xsd.attrUse = use
     , Xsd.attrType = tp
     }
+  where
+  anySimpleType =
+    Xsd.QName (Just (Xsd.Namespace Xsd.schemaNamespace)) "anySimpleType"
 
 parseUseAttribute :: Cursor -> P Xsd.Use
 parseUseAttribute c = case anAttribute "use" c of

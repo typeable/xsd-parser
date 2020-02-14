@@ -54,7 +54,7 @@ dumpResults stats = IO.withFile "xsts.md" IO.WriteMode $ \h -> do
       ]
 
 expectedFailures :: Int
-expectedFailures = 3648
+expectedFailures = 3554
 
 main :: IO ()
 main = do
