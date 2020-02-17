@@ -19,9 +19,10 @@ import Text.XML.Cursor
 import qualified Xsd
 
 data Stat = Stat
-  { statTestSet :: Text
-  , statTotal :: Int
+  { statTotal :: Int
   , statSucceeded :: Int
+  , statValidFailed :: Int
+  , statInvalidSucceeded :: Int
   }
   deriving (Show)
 
@@ -34,27 +35,29 @@ okRef :: IORef Int
 okRef = unsafePerformIO (newIORef 0)
 
 {-# NOINLINE statsRef #-}
-statsRef :: IORef [Stat]
+statsRef :: IORef [(Text, Stat)]
 statsRef = unsafePerformIO (newIORef [])
 
-dumpResults :: [Stat] -> IO ()
+dumpResults :: [(Text, Stat)] -> IO ()
 dumpResults stats = IO.withFile "xsts.md" IO.WriteMode $ \h -> do
   IO.hPutStrLn h "This table is generated automatically by `xsts` test."
   IO.hPutStrLn h "It contains number of xsd files successfully parsed."
   IO.hPutStrLn h "Note that we don't currently attempt to validate xml files"
   IO.hPutStrLn h "against the schemata."
   IO.hPutStrLn h ""
-  IO.hPutStrLn h "Test set | Total tests | Passed tests"
-  IO.hPutStrLn h "--- | --- | ---"
-  forM_ stats $ \s -> do
+  IO.hPutStrLn h "Test set | Total tests | Passed tests | Invalid passed | Valid failed"
+  IO.hPutStrLn h "--- | --- | --- | --- | ---"
+  forM_ stats $ \(name, s) -> do
     IO.hPutStrLn h $ mconcat
-      [ Text.unpack (statTestSet s), " | "
+      [ Text.unpack name, " | "
       , show (statTotal s), " | "
-      , show (statSucceeded s)
+      , show (statSucceeded s), " | "
+      , show (statInvalidSucceeded s), " | "
+      , show (statValidFailed s)
       ]
 
 expectedFailures :: Int
-expectedFailures = 4066
+expectedFailures = 3513
 
 main :: IO ()
 main = do
@@ -90,24 +93,59 @@ runTestSet path = do
   results <- mapM (runTestGroup dir) (c $/ laxElement "testGroup")
   let
     stat = Stat
-      { statTestSet = name
-      , statTotal = (sum . map fst) results
-      , statSucceeded = (sum . map snd) results
+      { statTotal = (sum . map statTotal) results
+      , statSucceeded = (sum . map statSucceeded) results
+      , statValidFailed = (sum . map statValidFailed) results
+      , statInvalidSucceeded = (sum . map statInvalidSucceeded) results
       }
-  modifyIORef' statsRef (stat :)
+  modifyIORef' statsRef ((name, stat) :)
   where
   dir = takeDirectory path
 
-runTestGroup :: FilePath -> Cursor -> IO (Int, Int)
+runTestGroup :: FilePath -> Cursor -> IO Stat
 runTestGroup dir c = do
   name <- theAttribute c "name"
   results <- mapM (runSchemaTest dir name) (aChild c "schemaTest")
   case join results of
-    Nothing -> return (0, 0)
-    Just True -> return (1, 1)
-    Just False -> return (1, 0)
+    Nothing -> return Stat
+      { statTotal = 0
+      , statSucceeded = 0
+      , statValidFailed = 0
+      , statInvalidSucceeded = 0
+      }
+    Just ValidSucceeded -> return Stat
+      { statTotal = 1
+      , statSucceeded = 1
+      , statValidFailed = 0
+      , statInvalidSucceeded = 0
+      }
+    Just ValidFailed -> return Stat
+      { statTotal = 1
+      , statSucceeded = 0
+      , statValidFailed = 1
+      , statInvalidSucceeded = 0
+      }
+    Just InvalidSucceeded -> return Stat
+      { statTotal = 1
+      , statSucceeded = 0
+      , statValidFailed = 0
+      , statInvalidSucceeded = 1
+      }
+    Just InvalidFailed -> return Stat
+      { statTotal = 1
+      , statSucceeded = 1
+      , statValidFailed = 0
+      , statInvalidSucceeded = 0
+      }
 
-runSchemaTest :: FilePath -> Text -> Cursor -> IO (Maybe Bool)
+data Result
+  = InvalidFailed
+  | InvalidSucceeded
+  | ValidFailed
+  | ValidSucceeded
+  deriving (Show)
+
+runSchemaTest :: FilePath -> Text -> Cursor -> IO (Maybe Result)
 runSchemaTest dir groupName c = do
   path <- do
     c' <- theChild c "schemaDocument"
@@ -126,21 +164,21 @@ runSchemaTest dir groupName c = do
       case (res, valid) of
         (Left _, False) -> do
           modifyIORef' okRef succ
-          return (Just True)
+          return (Just InvalidFailed)
         (Right _, True) -> do
           modifyIORef' okRef succ
-          return (Just True)
+          return (Just ValidSucceeded)
         (Right _, False) -> do
           modifyIORef' errRef succ
           putStrLn $ "invalid xsd passed: " <> Text.unpack groupName
             <> " (" <> dir </> Text.unpack path <> ")"
-          return (Just False)
+          return (Just InvalidSucceeded)
         (Left err, True) -> do
           modifyIORef' errRef succ
           putStrLn $ "valid xsd didn't pass: " <> Text.unpack groupName
             <> " (" <> dir </> Text.unpack path <> ")"
             <> ": " <> show (err :: SomeException)
-          return (Just False)
+          return (Just ValidFailed)
 
 anAttribute :: Cursor -> Text -> Maybe Text
 anAttribute c name = case c $| laxAttribute name of

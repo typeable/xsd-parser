@@ -3,98 +3,98 @@ It contains number of xsd files successfully parsed.
 Note that we don't currently attempt to validate xml files
 against the schemata.
 
-Test set | Total tests | Passed tests
---- | --- | ---
-yearMonthDuration | 25 | 9
-XSImportReference | 1 | 0
-XPathDefaultNSonKeyKeyRefUnique | 13 | 11
-XML11Support | 11 | 11
-wildcard | 17 | 15
-VC | 6 | 5
-unsignedIntegers | 8 | 8
-UnitsLength | 8 | 7
-union | 19 | 6
-CTA | 6 | 4
-TypeAlternativeTests | 23 | 9
-time | 1 | 1
-TargetNS | 2 | 1
-substitutionGroup | 5 | 3
-rf-whiteSpace | 2 | 2
-RestrictionOfComplexTypes | 13 | 11
-RegularExpression | 8 | 8
-PopenContent | 24 | 13
-list | 2 | 1
-IdentityConstraint | 12 | 7
-ID_IDREF | 77 | 44
-gMonth | 1 | 0
-gDay | 1 | 1
-gMonthDay | 1 | 1
-gYear | 1 | 1
-gYearMonth | 1 | 1
-float | 2 | 2
-explicitTimezone | 18 | 10
-EDCWildcard | 2 | 2
-double | 2 | 2
-DefaultFixed | 5 | 5
-defaultAttributesApply | 17 | 14
-dayTimeDuration | 24 | 8
-dateTimeStamp | 28 | 9
-date | 1 | 1
-CyclicDependencies_Redefine_Include_Import_Override | 5 | 0
-constraintsOnAttribute | 16 | 9
-ConditionalInclusion | 3 | 2
-assertion | 51 | 42
-Assert | 35 | 25
-anyAttribute | 9 | 7
-allGroup | 9 | 8
-IRI | 1 | 0
-substitution-groups | 6 | 6
-Zone | 9 | 5
-Zone | 20 | 16
-XmlVersions | 13 | 13
-Wild | 84 | 57
-VC | 24 | 9
-TargetNS | 4 | 0
-Subsgroup | 6 | 3
-Simple | 58 | 31
-Override | 30 | 21
-Open | 51 | 34
-Missing | 6 | 5
-Id | 32 | 15
-CTA | 44 | 15
-Complex | 25 | 11
-Assert | 34 | 12
-All | 62 | 27
-BoeingXSDTestCases | 6 | 6
-MS-Wildcards2006-07-15 | 315 | 212
-MS-SimpleType2006-07-15 | 333 | 169
-MS-Schema2006-07-15 | 124 | 55
-MS-Regex2006-07-15 | 2590 | 1988
-MS-Particles2006-07-15 | 855 | 511
-MS-Notations2006-07-15 | 116 | 40
-MS-ModelGroups2006-07-15 | 391 | 222
-MS-IdentityConstraint2006-07-15 | 844 | 571
-MS-Group2006-07-15 | 218 | 122
-MS-Errata102006-07-15 | 19 | 17
-MS-Element2006-07-15 | 355 | 198
-MS-DataTypes2006-07-15 | 2247 | 1482
-MS-ComplexType2006-07-15 | 550 | 303
-MS-Attribute2006-07-15 | 279 | 138
-MS-AttributeGroup2006-07-15 | 114 | 64
-MS-Annotations2006-07-15 | 80 | 51
-MS-Additional2006-07-15 | 253 | 165
-Wildcard | 26 | 22
-Schema | 6 | 6
-SType | 138 | 123
-Notation | 13 | 8
-MGroupDef | 19 | 8
-MGroup | 40 | 24
-IdConstrDefs | 27 | 19
-ElemDecl | 227 | 155
-CType | 31 | 15
-AttrUse | 4 | 1
-AttrDecl | 83 | 78
-AGroupDef | 13 | 6
-suntest | 52 | 22
-NIST2004-01-14 | 3953 | 3873
-introspection | 1 | 0
+Test set | Total tests | Passed tests | Invalid passed | Valid failed
+--- | --- | --- | --- | ---
+yearMonthDuration | 25 | 13 | 12 | 0
+XSImportReference | 1 | 0 | 1 | 0
+XPathDefaultNSonKeyKeyRefUnique | 13 | 13 | 0 | 0
+XML11Support | 11 | 11 | 0 | 0
+wildcard | 17 | 15 | 2 | 0
+VC | 6 | 6 | 0 | 0
+unsignedIntegers | 8 | 8 | 0 | 0
+UnitsLength | 8 | 6 | 2 | 0
+union | 19 | 14 | 5 | 0
+CTA | 6 | 6 | 0 | 0
+TypeAlternativeTests | 23 | 16 | 7 | 0
+time | 1 | 1 | 0 | 0
+TargetNS | 2 | 2 | 0 | 0
+substitutionGroup | 5 | 3 | 2 | 0
+rf-whiteSpace | 2 | 2 | 0 | 0
+RestrictionOfComplexTypes | 13 | 9 | 4 | 0
+RegularExpression | 8 | 8 | 0 | 0
+PopenContent | 24 | 16 | 8 | 0
+list | 2 | 1 | 1 | 0
+IdentityConstraint | 12 | 6 | 6 | 0
+ID_IDREF | 77 | 57 | 20 | 0
+gMonth | 1 | 0 | 1 | 0
+gDay | 1 | 1 | 0 | 0
+gMonthDay | 1 | 1 | 0 | 0
+gYear | 1 | 1 | 0 | 0
+gYearMonth | 1 | 1 | 0 | 0
+float | 2 | 2 | 0 | 0
+explicitTimezone | 18 | 14 | 4 | 0
+EDCWildcard | 2 | 2 | 0 | 0
+double | 2 | 2 | 0 | 0
+DefaultFixed | 5 | 5 | 0 | 0
+defaultAttributesApply | 17 | 14 | 3 | 0
+dayTimeDuration | 24 | 12 | 12 | 0
+dateTimeStamp | 28 | 11 | 17 | 0
+date | 1 | 1 | 0 | 0
+CyclicDependencies_Redefine_Include_Import_Override | 5 | 0 | 5 | 0
+constraintsOnAttribute | 16 | 6 | 10 | 0
+ConditionalInclusion | 3 | 2 | 1 | 0
+assertion | 51 | 50 | 1 | 0
+Assert | 35 | 35 | 0 | 0
+anyAttribute | 9 | 7 | 2 | 0
+allGroup | 9 | 7 | 2 | 0
+IRI | 1 | 1 | 0 | 0
+substitution-groups | 6 | 6 | 0 | 0
+Zone | 9 | 5 | 4 | 0
+Zone | 20 | 15 | 5 | 0
+XmlVersions | 13 | 13 | 0 | 0
+Wild | 84 | 63 | 21 | 0
+VC | 24 | 19 | 4 | 1
+TargetNS | 4 | 2 | 2 | 0
+Subsgroup | 6 | 3 | 3 | 0
+Simple | 58 | 17 | 41 | 0
+Override | 30 | 21 | 9 | 0
+Open | 51 | 37 | 14 | 0
+Missing | 6 | 4 | 2 | 0
+Id | 32 | 30 | 2 | 0
+CTA | 44 | 33 | 11 | 0
+Complex | 25 | 19 | 6 | 0
+Assert | 34 | 34 | 0 | 0
+All | 62 | 26 | 34 | 2
+BoeingXSDTestCases | 6 | 6 | 0 | 0
+MS-Wildcards2006-07-15 | 315 | 218 | 97 | 0
+MS-SimpleType2006-07-15 | 333 | 210 | 123 | 0
+MS-Schema2006-07-15 | 124 | 56 | 61 | 7
+MS-Regex2006-07-15 | 2590 | 1988 | 602 | 0
+MS-Particles2006-07-15 | 855 | 561 | 293 | 1
+MS-Notations2006-07-15 | 116 | 38 | 78 | 0
+MS-ModelGroups2006-07-15 | 391 | 215 | 176 | 0
+MS-IdentityConstraint2006-07-15 | 844 | 621 | 223 | 0
+MS-Group2006-07-15 | 218 | 138 | 80 | 0
+MS-Errata102006-07-15 | 19 | 15 | 4 | 0
+MS-Element2006-07-15 | 355 | 263 | 92 | 0
+MS-DataTypes2006-07-15 | 2247 | 1491 | 752 | 4
+MS-ComplexType2006-07-15 | 550 | 311 | 239 | 0
+MS-Attribute2006-07-15 | 279 | 165 | 114 | 0
+MS-AttributeGroup2006-07-15 | 114 | 63 | 51 | 0
+MS-Annotations2006-07-15 | 80 | 51 | 27 | 2
+MS-Additional2006-07-15 | 253 | 202 | 45 | 6
+Wildcard | 26 | 22 | 4 | 0
+Schema | 6 | 6 | 0 | 0
+SType | 138 | 131 | 7 | 0
+Notation | 13 | 8 | 5 | 0
+MGroupDef | 19 | 8 | 11 | 0
+MGroup | 40 | 24 | 16 | 0
+IdConstrDefs | 27 | 21 | 6 | 0
+ElemDecl | 227 | 171 | 56 | 0
+CType | 31 | 25 | 6 | 0
+AttrUse | 4 | 3 | 1 | 0
+AttrDecl | 83 | 78 | 5 | 0
+AGroupDef | 13 | 6 | 7 | 0
+suntest | 52 | 30 | 22 | 0
+NIST2004-01-14 | 3953 | 3953 | 0 | 0
+introspection | 1 | 0 | 0 | 1

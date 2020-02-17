@@ -91,7 +91,7 @@ spec = do
             Xsd.AtomicType restriction _ = t
           res `shouldSatisfy` isRight
           tpName `shouldBe` (Xsd.QName Nothing "str")
-          Xsd.restrictionBase restriction `shouldBe`
+          Xsd.simpleRestrictionBase restriction `shouldBe`
             Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
         context "when restriction contains enumerations" $ do
@@ -115,7 +115,7 @@ spec = do
               Xsd.AtomicType restriction _ = t
             res `shouldSatisfy` isRight
             tpName `shouldBe` (Xsd.QName Nothing "str")
-            Xsd.restrictionConstraints restriction `shouldBe`
+            Xsd.simpleRestrictionConstraints restriction `shouldBe`
               [ Xsd.Enumeration "value1"
               , Xsd.Enumeration "value2"
               ]
@@ -138,10 +138,10 @@ spec = do
                 fmap Xsd.children res
               Xsd.AtomicType restriction' _ = t
               Xsd.Inline (Xsd.AtomicType restriction _) =
-                Xsd.restrictionBase restriction'
+                Xsd.simpleRestrictionBase restriction'
             res `shouldSatisfy` isRight
             tpName `shouldBe` (Xsd.QName Nothing "str")
-            Xsd.restrictionBase restriction `shouldBe`
+            Xsd.simpleRestrictionBase restriction `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
         context "when base refers to an unbound prefix" $ do
@@ -200,11 +200,11 @@ spec = do
               Right [Xsd.ChildType tpName (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
               Xsd.ContentPlain plain = Xsd.complexContent t
-              [attr] = Xsd.plainContentAttributes plain
+              [Xsd.InlineAttribute attr] = Xsd.plainContentAttributes plain
             res `shouldSatisfy` isRight
             tpName `shouldBe` Xsd.QName Nothing "person"
-            Xsd.attrName attr `shouldBe` Xsd.QName Nothing "firstName"
-            Xsd.attrType attr `shouldBe`
+            Xsd.attributeInlineName attr `shouldBe` Xsd.QName Nothing "firstName"
+            Xsd.attributeInlineType attr `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
         context "when attribute type is inlined" $ do
@@ -226,10 +226,11 @@ spec = do
               Right [Xsd.ChildType _ (Xsd.TypeComplex t)] =
                 fmap Xsd.children res
               Xsd.ContentPlain plain = Xsd.complexContent t
-              [attr] = Xsd.plainContentAttributes plain
-              Xsd.Inline (Xsd.AtomicType restriction _) = Xsd.attrType attr
+              [Xsd.InlineAttribute attr] = Xsd.plainContentAttributes plain
+              Xsd.Inline (Xsd.AtomicType restriction _) =
+                Xsd.attributeInlineType attr
             res `shouldSatisfy` isRight
-            Xsd.restrictionBase restriction `shouldBe`
+            Xsd.simpleRestrictionBase restriction `shouldBe`
               Xsd.Ref (Xsd.QName (Just (Xsd.Namespace "something")) "string")
 
       context "when it contains a sequence" $ do

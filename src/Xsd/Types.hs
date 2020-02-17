@@ -6,19 +6,23 @@ module Xsd.Types
 , Child(..)
 , Type(..)
 , SimpleType(..)
-, Restriction(..)
 , Constraint(..)
 , ComplexType(..)
 , Content(..)
 , PlainContent(..)
 , SimpleContent(..)
+, SimpleExtension(..)
+, SimpleRestriction(..)
 , ComplexContent(..)
 , ComplexExtension(..)
+, ComplexRestriction(..)
 , RefOr(..)
 , refOr
 , Element(..)
 , MaxOccurs(..)
 , Attribute(..)
+, AttributeRef(..)
+, AttributeInline(..)
 , Annotation(..)
 , Use(..)
 , ModelGroup(..)
@@ -89,9 +93,9 @@ data Include = Include
   deriving (Show, Eq)
 
 data SimpleType
-  = AtomicType Restriction [Annotation]
+  = AtomicType SimpleRestriction [Annotation]
   | ListType (RefOr SimpleType) [Annotation]
-  -- TODO: also union
+  | UnionType [RefOr SimpleType] [Annotation]
   deriving (Show, Eq)
 
 data ComplexType = ComplexType
@@ -115,7 +119,7 @@ data PlainContent = PlainContent
 
 data ComplexContent
   = ComplexContentExtension ComplexExtension
-  | ComplexContentRestriction -- TODO: implement me
+  | ComplexContentRestriction ComplexRestriction
   deriving (Show, Eq)
 
 data ComplexExtension = ComplexExtension
@@ -125,8 +129,16 @@ data ComplexExtension = ComplexExtension
   }
   deriving (Show, Eq)
 
--- TODO: implement me
-data SimpleContent = SimpleContent
+data ComplexRestriction = ComplexRestriction
+  { complexRestrictionBase :: QName
+  , complexRestrictionModel :: Maybe ModelGroup
+  , complexRestrictionAttributes :: [Attribute]
+  }
+  deriving (Show, Eq)
+
+data SimpleContent
+  = SimpleContentExtension SimpleExtension
+  | SimpleContentRestriction SimpleRestriction
   deriving (Show, Eq)
 
 data ModelGroup
@@ -135,10 +147,21 @@ data ModelGroup
   | All [RefOr Element]
   deriving (Show, Eq)
 
-data Attribute = Attribute
-  { attrName :: QName
-  , attrType :: RefOr SimpleType
-  , attrUse :: Use
+data Attribute
+  = RefAttribute AttributeRef
+  | InlineAttribute AttributeInline
+  deriving (Show, Eq)
+
+data AttributeInline = AttributeInline
+  { attributeInlineName :: QName
+  , attributeInlineType :: RefOr SimpleType
+  , attributeInlineUse :: Use
+  }
+  deriving (Show, Eq)
+
+data AttributeRef = AttributeRef
+  { attributeRefRef :: QName
+  , attributeRefUse :: Use
   }
   deriving (Show, Eq)
 
@@ -148,10 +171,16 @@ data Use
   | Required
   deriving (Show, Eq)
 
-data Restriction = Restriction
-  { restrictionBase :: RefOr SimpleType
-  -- XXX: could restrictionBase be an inline type? Probably not.
-  , restrictionConstraints :: [Constraint]
+data SimpleRestriction = SimpleRestriction
+  { simpleRestrictionBase :: RefOr SimpleType
+  -- XXX: could simpleRestrictionBase be an inline type? Probably not.
+  , simpleRestrictionConstraints :: [Constraint]
+  }
+  deriving (Show, Eq)
+
+data SimpleExtension = SimpleExtension
+  { simpleExtensionBase :: QName
+  , simpleExtensionAttributes :: [Attribute]
   }
   deriving (Show, Eq)
 

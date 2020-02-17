@@ -160,18 +160,19 @@ parseSimpleType c = do
   unionAxis <- makeElemAxis "union"
   case (c $/ restrictionAxis, c $/ listAxis, c $/ unionAxis) of
     ([e], [], []) -> Xsd.AtomicType
-      <$> parseRestriction e
+      <$> parseSimpleRestriction e
       <*> parseAnnotations c
     ([], [l], []) -> Xsd.ListType
       <$> parseList l
       <*> parseAnnotations c
-    -- TODO implement me
-    ([], [], [_]) -> parseError c "Not implemented: union"
+    ([], [], [u]) -> Xsd.UnionType
+      <$> parseUnion u
+      <*> parseAnnotations c
     _ -> parseError c "Expected exactly of of restriction, list or union"
 
 -- | Restriction for simple type
-parseRestriction :: Cursor -> P Xsd.Restriction
-parseRestriction c = do
+parseSimpleRestriction :: Cursor -> P Xsd.SimpleRestriction
+parseSimpleRestriction c = do
   -- XXX: generalaze RefOr parsing
   tp <- case anAttribute "base" c of
     Nothing -> do
@@ -184,9 +185,9 @@ parseRestriction c = do
 
   constraints <- parseConstrains c
 
-  return Xsd.Restriction
-    { Xsd.restrictionBase = tp
-    , Xsd.restrictionConstraints = constraints
+  return Xsd.SimpleRestriction
+    { Xsd.simpleRestrictionBase = tp
+    , Xsd.simpleRestrictionConstraints = constraints
     }
 
 parseConstrains :: Cursor -> P [Xsd.Constraint]
@@ -206,6 +207,15 @@ parseList c =
         [s] -> Xsd.Inline <$> parseSimpleType s
         _ -> parseError c "Multiple types"
     Just t -> Xsd.Ref <$> makeQName c t
+
+parseUnion :: Cursor -> P [Xsd.RefOr Xsd.SimpleType]
+parseUnion c =
+  case anAttribute "memberTypes" c of
+    Just list ->
+      mapM (fmap Xsd.Ref . makeQName c) (Text.splitOn " " list)
+    Nothing -> do
+      simpleTypeAxis <- makeElemAxis "simpleType"
+      mapM (fmap Xsd.Inline . parseSimpleType) (c $/ simpleTypeAxis)
 
 parseComplexType :: Cursor -> P Xsd.ComplexType
 parseComplexType c = do
@@ -237,14 +247,29 @@ parsePlainContent c = do
     }
 
 parseSimpleContent :: Cursor -> P Xsd.SimpleContent
-parseSimpleContent c = parseError c "not implemented"
+parseSimpleContent c = do
+  restrictionAxis <- makeElemAxis "restriction"
+  extenstionAxis <- makeElemAxis "extension"
+  case (c $/ restrictionAxis, c $/ extenstionAxis) of
+    ([r], []) -> Xsd.SimpleContentRestriction <$> parseSimpleRestriction r
+    ([], [e]) -> Xsd.SimpleContentExtension <$> parseSimpleExtension e
+    _ -> parseError c "Expected one of restriction or extension"
+
+parseSimpleExtension :: Cursor -> P Xsd.SimpleExtension
+parseSimpleExtension c = handleNamespaces c $ do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  return Xsd.SimpleExtension
+    { Xsd.simpleExtensionBase = base
+    , Xsd.simpleExtensionAttributes = attributes
+    }
 
 parseComplexContent :: Cursor -> P Xsd.ComplexContent
 parseComplexContent c = do
   restrictionAxis <- makeElemAxis "restriction"
   extenstionAxis <- makeElemAxis "extension"
   case (c $/ restrictionAxis, c $/ extenstionAxis) of
-    ([r], []) -> parseError r "not implemented"
+    ([r], []) -> Xsd.ComplexContentRestriction <$> parseComplexRestriction r
     ([], [e]) -> Xsd.ComplexContentExtension <$> parseComplexExtension e
     _ -> parseError c "Expected one of restriction or extension"
 
@@ -257,6 +282,17 @@ parseComplexExtension c = handleNamespaces c $ do
     { Xsd.complexExtensionBase = base
     , Xsd.complexExtensionModel = model
     , Xsd.complexExtensionAttributes = attributes
+    }
+
+parseComplexRestriction :: Cursor -> P Xsd.ComplexRestriction
+parseComplexRestriction c = handleNamespaces c $ do
+  base <- theAttribute "base" c >>= makeQName c
+  attributes <- parseAttributes c
+  model <- parseModelGroup c
+  return Xsd.ComplexRestriction
+    { Xsd.complexRestrictionBase = base
+    , Xsd.complexRestrictionModel = model
+    , Xsd.complexRestrictionAttributes = attributes
     }
 
 parseModelGroup :: Cursor -> P (Maybe Xsd.ModelGroup)
@@ -293,24 +329,33 @@ parseAttributes c = do
 
 parseAttribute :: Cursor -> P Xsd.Attribute
 parseAttribute c = do
-  name <- theAttribute "name" c >>= makeTargetQName
   use <- parseUseAttribute c
-
-  -- XXX: generalaze RefOr parsing
-  tp <- case anAttribute "type" c of
-    Nothing -> do
-      simpleTypeAxis <- makeElemAxis "simpleType"
-      case c $/ simpleTypeAxis of
-        [s] -> Xsd.Inline <$> parseSimpleType s
-        [] -> parseError c "Attribute should have type"
-        _ -> parseError c "Multiple simple types"
-    Just t -> Xsd.Ref <$> makeQName c t
-
-  return Xsd.Attribute
-    { Xsd.attrName = name
-    , Xsd.attrUse = use
-    , Xsd.attrType = tp
-    }
+  case (anAttribute "name" c, anAttribute "ref" c) of
+    (Just n, Nothing) -> do
+      name <- makeTargetQName n
+      tp <- case anAttribute "type" c of
+        Nothing -> do
+          simpleTypeAxis <- makeElemAxis "simpleType"
+          case c $/ simpleTypeAxis of
+            [s] -> Xsd.Inline <$> parseSimpleType s
+            [] -> return (Xsd.Ref anySimpleType)
+            _ -> parseError c "Multiple simple types"
+        Just t -> Xsd.Ref <$> makeQName c t
+      return $ Xsd.InlineAttribute $ Xsd.AttributeInline
+        { Xsd.attributeInlineName = name
+        , Xsd.attributeInlineUse = use
+        , Xsd.attributeInlineType = tp
+        }
+    (Nothing, Just r) -> do
+      ref <- makeQName c r
+      return $ Xsd.RefAttribute $ Xsd.AttributeRef
+        { Xsd.attributeRefRef = ref
+        , Xsd.attributeRefUse = use
+        }
+    _ -> parseError c "Should be either name or ref"
+  where
+  anySimpleType =
+    Xsd.QName (Just (Xsd.Namespace Xsd.schemaNamespace)) "anySimpleType"
 
 parseUseAttribute :: Cursor -> P Xsd.Use
 parseUseAttribute c = case anAttribute "use" c of
